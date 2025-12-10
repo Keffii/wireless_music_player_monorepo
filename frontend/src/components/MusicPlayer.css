@@ -1,0 +1,256 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.unlock-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+h2 {
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.cover {
+  width: 300px;
+  height: 300px;
+}
+
+.cover img {
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+.song-name {
+  text-align: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.artist-name {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.music-player {
+  display: none;
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: white;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: white;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+#progress-slider,
+#volume-slider {
+  flex: 1;
+}
+
+#volume-icon {
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+#current-time,
+#total-duration {
+  min-width: 40px;
+}
+
+#volume-icon:hover {
+  color: hotpink;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ---- Chrome / Edge / Safari support for sliders ---- */
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 5px;
+  background: white;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hotpink;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- Firefox Support for sliders ---- */
+input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 5px;
+  background: white;
+}
+
+input[type='range']::-moz-range-progress {
+  height: 6px;
+  border-radius: 5px;
+  background: hotpink;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hotpink;
+  cursor: pointer;
+  border: none;
+}
+
+/* ---- Edge / IE Fallback ---- */
+input[type='range']::-ms-track {
+  height: 6px;
+  border-radius: 5px;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+input[type='range']::-ms-fill-lower {
+  background: hotpink;
+  border-radius: 5px;
+}
+
+input[type='range']::-ms-fill-upper {
+  background: white;
+  border-radius: 5px;
+}
+
+input[type='range']::-ms-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hotpink;
+  cursor: pointer;
+}
+
+button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.play-button {
+  padding: 18px 22px;
+  font-size: 1.5rem;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.buttons-row {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.status {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  font-family: monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.grafana-text {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.grafana-text a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.3s;
+}
+
+.grafana-text a:hover {
+  color: hotpink;
+}
+
+.grafana-icon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
