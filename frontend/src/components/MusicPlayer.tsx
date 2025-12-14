@@ -251,19 +251,7 @@ const MusicPlayer: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <div className="cover">
-        <img id="cover-art" src={coverUrl} alt="Album Cover" />
-      </div>
-
-      <div className="song-name">
-        <h1>{songTitle}</h1>
-      </div>
-
-      <div className="artist-name">
-        <p>{songArtist}</p>
-      </div>
-
+    <div className="music-player">
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
@@ -271,70 +259,86 @@ const MusicPlayer: React.FC = () => {
         onEnded={handleEnded}
       />
 
-      <div className="progress-bar">
-        <span>{formatTime(currentTime)}</span>
-        <input
-          ref={progressSliderRef}
-          type="range"
-          min="0"
-          max={duration || 0}
-          value={currentTime}
-          onChange={handleProgressChange}
-        />
-        <span>{formatTime(duration)}</span>
+      {/* Left Section - Album Art & Song Info */}
+      <div className="player-left">
+        <div className="player-album-art">
+          <img src={coverUrl} alt="Album Cover" />
+        </div>
+        <div className="player-song-info">
+          <div className="player-song-title">{songTitle}</div>
+          <div className="player-song-artist">{songArtist}</div>
+        </div>
       </div>
 
-      <div className="volume-control">
-        <i
-          className={`fa-solid ${isMuted || volume === 0 ? 'fa-volume-xmark' : 'fa-volume-up'}`}
-          onClick={handleMute}
-        />
-        <input
-          ref={volumeSliderRef}
-          type="range"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={handleVolumeChange}
-        />
-        <span style={{ minWidth: '40px' }}></span>
-      </div>
-
-      <div className="buttons">
-        <div className="buttons-row">
+      {/* Center Section - Controls & Progress */}
+      <div className="player-center">
+        <div className="player-controls">
           <button
-            id="shuffle-btn"
             onClick={() => sendCommand('SHUFFLE')}
-            style={{ opacity: shuffleEnabled ? '1' : '0.3' }}
+            className={shuffleEnabled ? 'active' : ''}
+            title="Shuffle"
           >
             <i className="fa-solid fa-shuffle"></i>
           </button>
-          <button className="prev-next-btn" onClick={() => sendCommand('PREV')}>
-            <i className="fa-solid fa-backward"></i>
+          <button onClick={() => sendCommand('PREV')} title="Previous">
+            <i className="fa-solid fa-backward-step"></i>
           </button>
-          <button className="play-button" onClick={handlePlayPause}>
+          <button className="play-button" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Play'}>
             <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
           </button>
-          <button className="prev-next-btn" onClick={() => sendCommand('NEXT')}>
-            <i className="fa-solid fa-forward"></i>
+          <button onClick={() => sendCommand('NEXT')} title="Next">
+            <i className="fa-solid fa-forward-step"></i>
           </button>
           <button
-            id="repeat-btn"
             onClick={() => sendCommand('REPEAT')}
-            style={{ opacity: repeatEnabled ? '1' : '0.3' }}
+            className={repeatEnabled ? 'active' : ''}
+            title="Repeat"
           >
             <i className="fa-solid fa-repeat"></i>
           </button>
         </div>
+        <div className="player-progress-container">
+          <span className="player-time">{formatTime(currentTime)}</span>
+          <input
+            ref={progressSliderRef}
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleProgressChange}
+          />
+          <span className="player-time">{formatTime(duration)}</span>
+        </div>
       </div>
 
-      <div className="grafana-text">
+      {/* Right Section - Volume & Grafana */}
+      <div className="player-right">
+        <div className="player-volume-container">
+          <i
+            className={`fa-solid player-volume-icon ${isMuted || volume === 0 ? 'fa-volume-xmark' : 'fa-volume-high'}`}
+            onClick={handleMute}
+          />
+          <input
+            ref={volumeSliderRef}
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={handleVolumeChange}
+          />
+        </div>
         <a
-          href="https://keffii.grafana.net/d/keljdwl/wireless-music-player?orgId=1&from=now-6h&to=now&timezone=browser"
+          href="http://localhost:3002/d/ad6pm99/wireless-music-player?orgId=1&from=now-6h&to=now&timezone=browser"
           target="_blank"
           rel="noopener noreferrer"
+          className="grafana-link"
+          title="View Statistics"
         >
-          View Statistics in Grafana <i className="fa-solid fa-chart-line"></i>
+          <img
+            src="https://grafana-assets.grafana.net/grafana/12.4.0-19938312174/public/build/static/img/grafana_icon.1e0deb6b.svg"
+            alt="Grafana"
+            className="grafana-icon"
+          />
         </a>
       </div>
     </div>

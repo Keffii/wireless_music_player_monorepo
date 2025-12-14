@@ -1,3 +1,36 @@
+/* Music Player Design System - Pink/Dark Theme */
+
+/* CSS Variables */
+:root {
+  --background: hsl(252, 15%, 15%);
+  --foreground: hsl(340, 50%, 90%);
+  --card: hsl(252, 18%, 18%);
+  --card-foreground: hsl(340, 50%, 90%);
+  --primary: hsl(340, 70%, 75%);
+  --primary-foreground: hsl(252, 15%, 15%);
+  --secondary: hsl(252, 15%, 22%);
+  --secondary-foreground: hsl(340, 50%, 90%);
+  --muted: hsl(252, 15%, 20%);
+  --muted-foreground: hsl(340, 30%, 70%);
+  --accent: hsl(340, 100%, 70%);
+  --accent-foreground: hsl(252, 15%, 15%);
+  --border: hsl(252, 15%, 25%);
+  --sidebar-background: hsl(252, 18%, 12%);
+  --sidebar-foreground: hsl(340, 50%, 90%);
+  --sidebar-accent: hsl(252, 15%, 18%);
+  --sidebar-border: hsl(252, 15%, 20%);
+  --player-background: hsl(252, 18%, 10%);
+  --player-glow: hsl(340, 70%, 75%);
+  --radius: 0.75rem;
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +38,37 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow: hidden;
+  line-height: 1.5;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(340, 70%, 75%, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(340, 70%, 75%, 0.7);
 }
