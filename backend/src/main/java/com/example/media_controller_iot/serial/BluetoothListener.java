@@ -35,8 +35,14 @@ public class BluetoothListener {
 
     @EventListener(ApplicationReadyEvent.class)
     public void startBluetoothListener() {
-        SerialPort comPort = SerialPort.getCommPort("COM6"); // Change if needed
-        comPort.setBaudRate(115200);
+        SerialPort comPort;
+        try {
+            comPort = SerialPort.getCommPort("COM6"); // Change if needed
+            comPort.setBaudRate(115200);
+        } catch (Exception e) {
+            log.warn("Serial port COM6 not available (normal in Docker/cloud environments): {}", e.getMessage());
+            return;
+        }
 
         if (!comPort.openPort()) {
             log.warn("Could not open COM6.");

@@ -35,6 +35,9 @@ frontend/yarn-error.log*
 # Docker env
 .env.docker
 
+# Repository env (do not commit secrets)
+.env
+
 # Additional ignores
 # (kept in sync with project subfolders)
 frontend/dist/

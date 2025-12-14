@@ -1,24 +1,44 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import './MusicPlayer.css';
 
-const MusicPlayer = () => {
-  const [songs, setSongs] = useState([]);
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(50);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [shuffleEnabled, setShuffleEnabled] = useState(false);
-  const [repeatEnabled, setRepeatEnabled] = useState(false);
-  const [songTitle, setSongTitle] = useState('Song Name');
-  const [songArtist, setSongArtist] = useState('Artist Name');
-  const [coverUrl, setCoverUrl] = useState('/cover/better-day.png');
+interface Song {
+  id: number;
+  title: string;
+  artist: string;
+  srcUrl: string;
+  coverUrl: string;
+}
 
-  const audioRef = useRef(null);
-  const progressSliderRef = useRef(null);
-  const volumeSliderRef = useRef(null);
-  const songsRef = useRef([]);
+interface ServerState {
+  title: string;
+  artist: string;
+  shuffle: boolean;
+  repeat: boolean;
+  volume: number;
+  isMuted: boolean;
+  currentSongId: number;
+  isPlaying: boolean;
+  lastCommand?: string;
+}
+
+const MusicPlayer: React.FC = () => {
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(50);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [shuffleEnabled, setShuffleEnabled] = useState<boolean>(false);
+  const [repeatEnabled, setRepeatEnabled] = useState<boolean>(false);
+  const [songTitle, setSongTitle] = useState<string>('Song Name');
+  const [songArtist, setSongArtist] = useState<string>('Artist Name');
+  const [coverUrl, setCoverUrl] = useState<string>('/cover/better-day.png');
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const progressSliderRef = useRef<HTMLInputElement>(null);
+  const volumeSliderRef = useRef<HTMLInputElement>(null);
+  const songsRef = useRef<Song[]>([]);
 
   // API base URL
   const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080';
@@ -48,19 +68,35 @@ const MusicPlayer = () => {
     }
   }, [volume]);
 
-  const loadSongs = async () => {
+  const loadSongs = async (): Promise<void> => {
     try {
       const res = await fetch(`${API_BASE}/api/player/songs`);
-      const data = await res.json();
+      const data: Song[] = await res.json();
       setSongs(data);
       songsRef.current = data;
       console.log('Songs loaded:', data);
+      
+      // Set the first song immediately on load
+      if (data && data.length > 0) {
+        const firstSong = data[0];
+        setCurrentSong(firstSong);
+        setSongTitle(firstSong.title || 'Song Name');
+        setSongArtist(firstSong.artist || 'Artist Name');
+        
+        // Set cover URL with backend base
+        if (firstSong.coverUrl) {
+          const fullCoverUrl = firstSong.coverUrl.startsWith('http') 
+            ? firstSong.coverUrl 
+            : `${API_BASE}${firstSong.coverUrl}`;
+          setCoverUrl(fullCoverUrl);
+        }
+      }
     } catch (error) {
       console.error('Failed to load songs:', error);
     }
   };
 
-  const sendCommand = async (cmd) => {
+  const sendCommand = async (cmd: string): Promise<void> => {
     try {
       await fetch(`${API_BASE}/api/player/command`, {
         method: 'POST',
@@ -73,11 +109,11 @@ const MusicPlayer = () => {
     }
   };
 
-  const connectSSE = () => {
+  const connectSSE = (): (() => void) => {
     const eventSource = new EventSource(`${API_BASE}/api/player/stream`);
 
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    eventSource.onmessage = (event: MessageEvent) => {
+      const data: ServerState = JSON.parse(event.data);
       updateStateFromServer(data);
     };
 
@@ -90,7 +126,7 @@ const MusicPlayer = () => {
     return () => eventSource.close();
   };
 
-  const updateStateFromServer = (data) => {
+  const updateStateFromServer = (data: ServerState): void => {
     console.log('Server state update:', data);
     
     setSongTitle(data.title);
@@ -105,15 +141,15 @@ const MusicPlayer = () => {
     if (song) {
       setCurrentSong(song);
       
-    // Update cover URL with fallback - prepend backend URL for absolute paths
-    if (song.coverUrl) {
-      const fullCoverUrl = song.coverUrl.startsWith('http') 
-        ? song.coverUrl 
-        : `${API_BASE}${song.coverUrl}`;
-      setCoverUrl(fullCoverUrl);
-    } else {
-      setCoverUrl(`${API_BASE}/cover/better-day.jpg`);
-    }
+      // Update cover URL with fallback - prepend backend URL for absolute paths
+      if (song.coverUrl) {
+        const fullCoverUrl = song.coverUrl.startsWith('http') 
+          ? song.coverUrl 
+          : `${API_BASE}${song.coverUrl}`;
+        setCoverUrl(fullCoverUrl);
+      } else {
+        setCoverUrl(`${API_BASE}/cover/better-day.jpg`);
+      }
 
       // Update audio source if different
       if (audioRef.current && song.srcUrl) {
@@ -150,13 +186,13 @@ const MusicPlayer = () => {
     }
   };
 
-  const safePlay = () => {
-    audioRef.current?.play().catch((error) => {
+  const safePlay = (): void => {
+    audioRef.current?.play().catch((error: Error) => {
       console.warn('Autoplay blocked – waiting for user interaction.', error);
     });
   };
 
-  const handlePlayPause = async () => {
+  const handlePlayPause = async (): Promise<void> => {
     if (audioRef.current?.paused) {
       await sendCommand('PLAY');
     } else {
@@ -164,7 +200,7 @@ const MusicPlayer = () => {
     }
   };
 
-  const handleVolumeChange = (e) => {
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
     if (audioRef.current) {
@@ -173,11 +209,11 @@ const MusicPlayer = () => {
     sendCommand(`VOLUME:${newVolume}`);
   };
 
-  const handleMute = () => {
+  const handleMute = (): void => {
     sendCommand('MUTE');
   };
 
-  const handleProgressChange = (e) => {
+  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newTime = parseFloat(e.target.value);
     if (audioRef.current) {
       audioRef.current.currentTime = newTime;
@@ -185,30 +221,30 @@ const MusicPlayer = () => {
     setCurrentTime(newTime);
   };
 
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = (): void => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
   };
 
-  const handleLoadedMetadata = () => {
+  const handleLoadedMetadata = (): void => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
     }
   };
 
-  const handleEnded = () => {
+  const handleEnded = (): void => {
     sendCommand('NEXT');
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number): string => {
     if (isNaN(seconds)) return '0:00';
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
     return `${min}:${sec}`;
   };
 
-  const updateSliderBackground = (slider, value, min, max) => {
+  const updateSliderBackground = (slider: HTMLInputElement, value: number, min: number, max: number): void => {
     if (!slider) return;
     const percentage = ((value - min) / (max - min)) * 100;
     slider.style.background = `linear-gradient(to right, hotpink 0%, hotpink ${percentage}%, white ${percentage}%, white 100%)`;
@@ -294,16 +330,11 @@ const MusicPlayer = () => {
 
       <div className="grafana-text">
         <a
-          href="http://localhost:3000/d/adcnd7x/music-remote-esp32?orgId=1&from=now-30d&to=now&timezone=browser&kiosk=true"
+          href="https://keffii.grafana.net/d/keljdwl/wireless-music-player?orgId=1&from=now-6h&to=now&timezone=browser"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <h3>View Statistics in Grafana</h3>
-          <img
-            src="http://localhost:3000/public/build/static/img/grafana_icon.1e0deb6b.svg"
-            alt="Grafana Dashboard"
-            className="grafana-icon"
-          />
+          View Statistics in Grafana <i className="fa-solid fa-chart-line"></i>
         </a>
       </div>
     </div>
