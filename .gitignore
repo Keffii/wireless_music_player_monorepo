@@ -28,3 +28,13 @@ frontend/yarn-error.log*
 *~
 .vscode/
 .idea/
+
+# Docker env (keep secrets local)
+.env.docker
+
+# Docker env
+.env.docker
+
+# Additional ignores
+# (kept in sync with project subfolders)
+frontend/dist/

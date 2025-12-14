@@ -21,7 +21,7 @@ const MusicPlayer = () => {
   const songsRef = useRef([]);
 
   // API base URL
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080';
 
   // Load songs on component mount
   useEffect(() => {

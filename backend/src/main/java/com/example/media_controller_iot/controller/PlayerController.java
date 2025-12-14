@@ -1,6 +1,7 @@
 package com.example.media_controller_iot.controller;
 
 import com.example.media_controller_iot.service.PlayerService;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -23,7 +24,7 @@ public class PlayerController {
     }
 
     @GetMapping("/state")
-    public Map<String, Object> getState() {
+    public @NonNull Map<String, Object> getState() {
         return playerService.getState();
     }
 

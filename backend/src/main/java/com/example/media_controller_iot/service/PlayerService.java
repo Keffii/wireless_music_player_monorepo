@@ -6,6 +6,7 @@ import com.example.media_controller_iot.models.VolumeLog;
 import com.example.media_controller_iot.repository.PlayerCommandLogRepo;
 import com.example.media_controller_iot.repository.SongsRepo;
 import com.example.media_controller_iot.repository.VolumeLogRepo;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -142,7 +143,8 @@ public class PlayerService {
         broadcastState();
     }
 
-    public Map<String, Object> getState() {
+    @SuppressWarnings("null")
+    public @NonNull Map<String, Object> getState() {
         if (currentSong == null) loadInitialSong();
 
         return Map.ofEntries(
