@@ -69,7 +69,9 @@ public class PlayerService {
         List<Songs> songs = songsRepo.findAll();
         if (songs.isEmpty()) return;
 
+        // If repeat is enabled (and not shuffling), just restart the current song
         if (repeatEnabled && !shuffleEnabled) {
+            playbackPosition = 0;
             return;
         }
 

@@ -136,6 +136,11 @@ const MusicPlayer: React.FC = () => {
     setVolume(data.volume);
     setIsMuted(data.isMuted);
 
+    // Apply volume changes to audio element
+    if (audioRef.current) {
+      audioRef.current.volume = data.isMuted ? 0 : data.volume / 100;
+    }
+
     // Use ref to get current songs array
     const song = songsRef.current.find(s => s.id === data.currentSongId);
     if (song) {
@@ -193,6 +198,11 @@ const MusicPlayer: React.FC = () => {
   };
 
   const handlePlayPause = async (): Promise<void> => {
+    // If muted and trying to play, unmute first
+    if (isMuted && audioRef.current?.paused) {
+      await sendCommand('MUTE'); // Toggle unmute
+    }
+    
     if (audioRef.current?.paused) {
       await sendCommand('PLAY');
     } else {
