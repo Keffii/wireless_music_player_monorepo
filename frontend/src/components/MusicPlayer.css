@@ -4,7 +4,7 @@
   bottom: 0;
   left: 256px;
   right: 0;
-  height: 80px;
+  height: 120px;
   background-color: var(--player-background);
   border-top: 1px solid var(--border);
   display: flex;
@@ -26,9 +26,9 @@
 }
 
 .player-album-art {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
   overflow: hidden;
   background-color: var(--muted);
   flex-shrink: 0;
@@ -47,7 +47,7 @@
 }
 
 .player-song-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--foreground);
   margin: 0;
@@ -57,7 +57,7 @@
 }
 
 .player-song-artist {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted-foreground);
   margin: 4px 0 0 0;
   white-space: nowrap;
@@ -83,8 +83,8 @@
 }
 
 .player-controls button {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: transparent;
   border: none;
   color: var(--muted-foreground);
@@ -108,12 +108,12 @@
 }
 
 .player-controls button i {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .player-controls .play-button {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   background-color: var(--primary);
   color: var(--primary-foreground);
   border-radius: 50%;
@@ -129,7 +129,7 @@
 }
 
 .player-controls .play-button i {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .player-progress-container {
@@ -169,16 +169,16 @@
   align-items: center;
   gap: 8px;
   flex: 1;
-  max-width: 120px;
+  max-width: 170px;
 }
 
 .player-volume-icon {
   color: var(--muted-foreground);
   cursor: pointer;
   transition: color 0.2s ease;
-  font-size: 16px;
-  width: 32px;
-  height: 32px;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,8 +195,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   text-decoration: none;
 }
@@ -206,8 +206,8 @@
 }
 
 .grafana-icon {
-  width: 16px;
-  height: 16px;
+  width: 40px;
+  height: 40px;
   transition: transform 0.3s ease;
 }
 

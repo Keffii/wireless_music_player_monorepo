@@ -74,7 +74,7 @@ const MainContent: React.FC = () => {
               <div className="placeholder-image"></div>
             </div>
             <div className="rec-info">
-              <h3>Discover Weekly</h3>
+              <h3>Discover New Songs</h3>
               <p>New music for you</p>
             </div>
           </div>
@@ -83,7 +83,7 @@ const MainContent: React.FC = () => {
               <div className="placeholder-image"></div>
             </div>
             <div className="rec-info">
-              <h3>Release Radar</h3>
+              <h3>New Releases</h3>
               <p>Latest releases</p>
             </div>
           </div>
