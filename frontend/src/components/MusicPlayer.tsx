@@ -311,6 +311,7 @@ const MusicPlayer: React.FC = () => {
           <span className="player-time">{formatTime(currentTime)}</span>
           <input
             ref={progressSliderRef}
+            className="progress-slider"
             type="range"
             min="0"
             max={duration || 0}
@@ -330,6 +331,7 @@ const MusicPlayer: React.FC = () => {
           />
           <input
             ref={volumeSliderRef}
+            className="volume-slider"
             type="range"
             min="0"
             max="100"

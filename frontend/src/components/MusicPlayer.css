@@ -220,85 +220,155 @@ audio {
   display: none;
 }
 
-/* Range Sliders */
+/* Range Sliders - Base styles */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
-  background: var(--muted);
+  height: 4px;              /* Overall track height */
+  background: var(--muted); /* Unfilled track color */
   border-radius: 2px;
   outline: none;
   cursor: pointer;
   flex: 1;
 }
 
-/* Chrome / Edge / Safari */
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  background: transparent;
+/* Chrome / Edge / Safari - Progress Slider */
+.progress-slider::-webkit-slider-runnable-track {
+  height: 4px;              /* Track height */
+  background: transparent;  /* Track color */
   border-radius: 2px;
 }
 
-input[type="range"]::-webkit-slider-thumb {
+.progress-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  background: var(--primary);
-  border-radius: 50%;
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
   margin-top: -4px;
   cursor: pointer;
   transition: transform 0.15s ease;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
+.progress-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
 }
 
-/* Firefox */
-input[type="range"]::-moz-range-track {
-  height: 4px;
-  background: var(--muted);
+/* Chrome / Edge / Safari - Volume Slider */
+.volume-slider::-webkit-slider-runnable-track {
+  height: 4px;              /* Track height */
+  background: transparent;  /* Track color */
   border-radius: 2px;
 }
 
-input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  background: var(--primary);
-  border-radius: 50%;
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
+  margin-top: -4px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Firefox - Progress Slider */
+.progress-slider::-moz-range-track {
+  height: 4px;              /* Track height */
+  background: var(--muted); /* Track color */
+  border-radius: 2px;
+}
+
+.progress-slider::-moz-range-thumb {
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
   border: none;
   cursor: pointer;
 }
 
-input[type="range"]::-moz-range-progress {
+.progress-slider::-moz-range-progress {
   height: 4px;
   background: var(--primary);
   border-radius: 2px;
 }
 
-/* Edge / IE */
-input[type="range"]::-ms-track {
+/* Firefox - Volume Slider */
+.volume-slider::-moz-range-track {
+  height: 4px;              /* Track height */
+  background: var(--muted); /* Track color */
+  border-radius: 2px;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
+  border: none;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-progress {
   height: 4px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* Edge / IE - Progress Slider */
+.progress-slider::-ms-track {
+  height: 4px;              /* Track height */
   background: transparent;
   border-color: transparent;
   color: transparent;
 }
 
-input[type="range"]::-ms-fill-lower {
-  background: var(--primary);
+.progress-slider::-ms-fill-lower {
+  background: var(--primary); /* Filled track color */
   border-radius: 2px;
 }
 
-input[type="range"]::-ms-fill-upper {
-  background: var(--muted);
+.progress-slider::-ms-fill-upper {
+  background: var(--muted);   /* Unfilled track color */
   border-radius: 2px;
 }
 
-input[type="range"]::-ms-thumb {
-  width: 12px;
-  height: 12px;
-  background: var(--primary);
-  border-radius: 50%;
+.progress-slider::-ms-thumb {
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
+  cursor: pointer;
+}
+
+/* Edge / IE - Volume Slider */
+.volume-slider::-ms-track {
+  height: 4px;              /* Track height */
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+.volume-slider::-ms-fill-lower {
+  background: var(--primary); /* Filled track color */
+  border-radius: 2px;
+}
+
+.volume-slider::-ms-fill-upper {
+  background: var(--muted);   /* Unfilled track color */
+  border-radius: 2px;
+}
+
+.volume-slider::-ms-thumb {
+  width: 12px;              /* Dot size */
+  height: 12px;             /* Dot size */
+  background: var(--primary); /* Dot color */
+  border-radius: 50%;       /* Keep circular */
   cursor: pointer;
 }
