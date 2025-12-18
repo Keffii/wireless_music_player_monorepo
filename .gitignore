@@ -7,6 +7,8 @@ backend/.project
 backend/.settings/
 backend/bin/
 backend/out/
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application.properties
 
 # Frontend (React/Node)
 frontend/node_modules/
