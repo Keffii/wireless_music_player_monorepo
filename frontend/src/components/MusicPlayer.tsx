@@ -1,59 +1,47 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+﻿/* eslint-disable unicode-bom */
+import React, { useEffect, useRef } from 'react';
 import './MusicPlayer.css';
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  srcUrl: string;
-  coverUrl: string;
-}
-
-interface ServerState {
-  title: string;
-  artist: string;
-  shuffle: boolean;
-  repeat: boolean;
-  volume: number;
-  isMuted: boolean;
-  currentSongId: number;
-  isPlaying: boolean;
-  lastCommand?: string;
-}
+import { useMusicPlayer } from '../hooks/useMusicPlayer';
+import { sendCommand } from '../services/playerService';
+import { updateSliderBackground } from '../utils/helpers';
+import { SongInfo } from './player/SongInfo';
+import { PlayerControls } from './player/PlayerControls';
+import { ProgressBar } from './player/ProgressBar';
+import { PlayerRightSection } from './player/PlayerRightSection';
 
 const MusicPlayer: React.FC = () => {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(50);
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
-  const [shuffleEnabled, setShuffleEnabled] = useState<boolean>(false);
-  const [repeatEnabled, setRepeatEnabled] = useState<boolean>(false);
-  const [songTitle, setSongTitle] = useState<string>('Song Name');
-  const [songArtist, setSongArtist] = useState<string>('Artist Name');
-  const [coverUrl, setCoverUrl] = useState<string>('/cover/better-day.png');
+  const {
+    currentSong,
+    isPlaying,
+    isMuted,
+    volume,
+    currentTime,
+    duration,
+    shuffleEnabled,
+    repeatEnabled,
+    songTitle,
+    songArtist,
+    coverUrl,
+    setIsPlaying,
+    setIsMuted,
+    setVolume,
+    setCurrentTime,
+    setDuration,
+    audioRef,
+    loadSongs,
+    connectSSE,
+    safePlay,
+  } = useMusicPlayer();
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const progressSliderRef = useRef<HTMLInputElement>(null);
-  const volumeSliderRef = useRef<HTMLInputElement>(null);
-  const songsRef = useRef<Song[]>([]);
+  const progressSliderRef = useRef<HTMLInputElement | null>(null);
+  const volumeSliderRef = useRef<HTMLInputElement | null>(null);
 
-  // API base URL
-  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080';
-
-  // Load songs on component mount
+  // Load songs and connect SSE on mount
   useEffect(() => {
     loadSongs();
     connectSSE();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update songsRef when songs change
-  useEffect(() => {
-    songsRef.current = songs;
-  }, [songs]);
 
   // Update slider backgrounds when values change
   useEffect(() => {
@@ -68,139 +56,10 @@ const MusicPlayer: React.FC = () => {
     }
   }, [volume]);
 
-  const loadSongs = async (): Promise<void> => {
-    try {
-      const res = await fetch(`${API_BASE}/api/player/songs`);
-      const data: Song[] = await res.json();
-      setSongs(data);
-      songsRef.current = data;
-      console.log('Songs loaded:', data);
-      
-      // Set the first song immediately on load
-      if (data && data.length > 0) {
-        const firstSong = data[0];
-        setCurrentSong(firstSong);
-        setSongTitle(firstSong.title || 'Song Name');
-        setSongArtist(firstSong.artist || 'Artist Name');
-        
-        // Set cover URL with backend base
-        if (firstSong.coverUrl) {
-          const fullCoverUrl = firstSong.coverUrl.startsWith('http') 
-            ? firstSong.coverUrl 
-            : `${API_BASE}${firstSong.coverUrl}`;
-          setCoverUrl(fullCoverUrl);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load songs:', error);
-    }
-  };
-
-  const sendCommand = async (cmd: string): Promise<void> => {
-    try {
-      await fetch(`${API_BASE}/api/player/command`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: cmd })
-      });
-      console.log('Command sent:', cmd);
-    } catch (error) {
-      console.error('Failed to send command:', error);
-    }
-  };
-
-  const connectSSE = (): (() => void) => {
-    const eventSource = new EventSource(`${API_BASE}/api/player/stream`);
-
-    eventSource.onmessage = (event: MessageEvent) => {
-      const data: ServerState = JSON.parse(event.data);
-      updateStateFromServer(data);
-    };
-
-    eventSource.onerror = () => {
-      console.warn('SSE connection lost – reconnecting...');
-      eventSource.close();
-      setTimeout(connectSSE, 2000);
-    };
-
-    return () => eventSource.close();
-  };
-
-  const updateStateFromServer = (data: ServerState): void => {
-    console.log('Server state update:', data);
-    
-    setSongTitle(data.title);
-    setSongArtist(data.artist);
-    setShuffleEnabled(data.shuffle);
-    setRepeatEnabled(data.repeat);
-    setVolume(data.volume);
-    setIsMuted(data.isMuted);
-
-    // Apply volume changes to audio element
-    if (audioRef.current) {
-      audioRef.current.volume = data.isMuted ? 0 : data.volume / 100;
-    }
-
-    // Use ref to get current songs array
-    const song = songsRef.current.find(s => s.id === data.currentSongId);
-    if (song) {
-      setCurrentSong(song);
-      
-      // Update cover URL with fallback - prepend backend URL for absolute paths
-      if (song.coverUrl) {
-        const fullCoverUrl = song.coverUrl.startsWith('http') 
-          ? song.coverUrl 
-          : `${API_BASE}${song.coverUrl}`;
-        setCoverUrl(fullCoverUrl);
-      } else {
-        setCoverUrl(`${API_BASE}/cover/better-day.jpg`);
-      }
-
-      // Update audio source if different
-      if (audioRef.current && song.srcUrl) {
-        const currentSrc = audioRef.current.src;
-        const newSrc = song.srcUrl.startsWith('http') ? song.srcUrl : `${API_BASE}${song.srcUrl}`;
-        
-        if (currentSrc !== newSrc) {
-          const wasPlaying = !audioRef.current.paused;
-          audioRef.current.src = newSrc;
-          
-          if (data.isPlaying || wasPlaying) {
-            audioRef.current.load();
-            safePlay();
-          }
-        }
-      }
-    }
-
-    // Sync play/pause state
-    setIsPlaying(data.isPlaying);
-    
-    if (data.isPlaying && audioRef.current?.paused) {
-      safePlay();
-    } else if (!data.isPlaying && !audioRef.current?.paused) {
-      audioRef.current?.pause();
-    }
-
-    // Handle seek forward from ESP32 controller
-    if (data.lastCommand === 'SEEK_FORWARD' && audioRef.current) {
-      audioRef.current.currentTime = Math.min(
-        audioRef.current.currentTime + 10,
-        audioRef.current.duration
-      );
-    }
-  };
-
-  const safePlay = (): void => {
-    audioRef.current?.play().catch((error: Error) => {
-      console.warn('Autoplay blocked – waiting for user interaction.', error);
-    });
-  };
-
+  // Event handlers
   const handlePlayPause = async (): Promise<void> => {
-    // If muted and trying to play, unmute first
     if (isMuted && audioRef.current?.paused) {
-      await sendCommand('MUTE'); // Toggle unmute
+      await sendCommand('MUTE');
     }
     
     if (audioRef.current?.paused) {
@@ -247,19 +106,6 @@ const MusicPlayer: React.FC = () => {
     sendCommand('NEXT');
   };
 
-  const formatTime = (seconds: number): string => {
-    if (isNaN(seconds)) return '0:00';
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
-    return `${min}:${sec}`;
-  };
-
-  const updateSliderBackground = (slider: HTMLInputElement, value: number, min: number, max: number): void => {
-    if (!slider) return;
-    const percentage = ((value - min) / (max - min)) * 100;
-    slider.style.background = `linear-gradient(to right, hotpink 0%, hotpink ${percentage}%, white ${percentage}%, white 100%)`;
-  };
-
   return (
     <div className="music-player">
       <audio
@@ -269,90 +115,35 @@ const MusicPlayer: React.FC = () => {
         onEnded={handleEnded}
       />
 
-      {/* Left Section - Album Art & Song Info */}
-      <div className="player-left">
-        <div className="player-album-art">
-          <img src={coverUrl} alt="Album Cover" />
-        </div>
-        <div className="player-song-info">
-          <div className="player-song-title">{songTitle}</div>
-          <div className="player-song-artist">{songArtist}</div>
-        </div>
-      </div>
+      <SongInfo
+        coverUrl={coverUrl}
+        songTitle={songTitle}
+        songArtist={songArtist}
+      />
 
-      {/* Center Section - Controls & Progress */}
       <div className="player-center">
-        <div className="player-controls">
-          <button
-            onClick={() => sendCommand('SHUFFLE')}
-            className={shuffleEnabled ? 'active' : ''}
-            title="Shuffle"
-          >
-            <i className="fa-solid fa-shuffle"></i>
-          </button>
-          <button onClick={() => sendCommand('PREV')} title="Previous">
-            <i className="fa-solid fa-backward-step"></i>
-          </button>
-          <button className="play-button" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Play'}>
-            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
-          </button>
-          <button onClick={() => sendCommand('NEXT')} title="Next">
-            <i className="fa-solid fa-forward-step"></i>
-          </button>
-          <button
-            onClick={() => sendCommand('REPEAT')}
-            className={repeatEnabled ? 'active' : ''}
-            title="Repeat"
-          >
-            <i className="fa-solid fa-repeat"></i>
-          </button>
-        </div>
-        <div className="player-progress-container">
-          <span className="player-time">{formatTime(currentTime)}</span>
-          <input
-            ref={progressSliderRef}
-            className="progress-slider"
-            type="range"
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            onChange={handleProgressChange}
-          />
-          <span className="player-time">{formatTime(duration)}</span>
-        </div>
+        <PlayerControls
+          shuffleEnabled={shuffleEnabled}
+          isPlaying={isPlaying}
+          repeatEnabled={repeatEnabled}
+          currentSong={currentSong}
+          onPlayPause={handlePlayPause}
+        />
+        <ProgressBar
+          currentTime={currentTime}
+          duration={duration}
+          progressSliderRef={progressSliderRef}
+          onProgressChange={handleProgressChange}
+        />
       </div>
 
-      {/* Right Section - Volume & Grafana */}
-      <div className="player-right">
-        <div className="player-volume-container">
-          <i
-            className={`fa-solid player-volume-icon ${isMuted || volume === 0 ? 'fa-volume-xmark' : 'fa-volume-high'}`}
-            onClick={handleMute}
-          />
-          <input
-            ref={volumeSliderRef}
-            className="volume-slider"
-            type="range"
-            min="0"
-            max="100"
-            value={volume}
-            onChange={handleVolumeChange}
-          />
-        </div>
-        <a
-          href="http://localhost:3002/d/ad6pm99/wireless-music-player?orgId=1&from=now-6h&to=now&timezone=browser"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="grafana-link"
-          title="View Statistics"
-        >
-          <img
-            src="https://grafana-assets.grafana.net/grafana/12.4.0-19938312174/public/build/static/img/grafana_icon.1e0deb6b.svg"
-            alt="Grafana"
-            className="grafana-icon"
-          />
-        </a>
-      </div>
+      <PlayerRightSection
+        volume={volume}
+        isMuted={isMuted}
+        volumeSliderRef={volumeSliderRef}
+        onVolumeChange={handleVolumeChange}
+        onMute={handleMute}
+      />
     </div>
   );
 };

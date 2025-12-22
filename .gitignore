@@ -46,3 +46,7 @@ frontend/yarn-error.log*
 # Additional ignores
 # (kept in sync with project subfolders)
 frontend/dist/
+
+# Ignore refactor and structure docs created during development
+frontend/src/components/MusicPlayer.old.tsx
+frontend/STRUCTURE.md

@@ -3,16 +3,19 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import MusicPlayer from './components/MusicPlayer';
+import { FavoritesProvider } from './context/FavoritesContext';
 
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <div className="app-container">
-        <Sidebar />
-        <MainContent />
+    <FavoritesProvider>
+      <div className="App">
+        <div className="app-container">
+          <Sidebar />
+          <MainContent />
+        </div>
+        <MusicPlayer />
       </div>
-      <MusicPlayer />
-    </div>
+    </FavoritesProvider>
   );
 };
 

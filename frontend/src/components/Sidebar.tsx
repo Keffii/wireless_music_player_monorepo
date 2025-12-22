@@ -1,7 +1,10 @@
 import React from 'react';
 import './Sidebar.css';
+import { useFavorites } from '../context/FavoritesContext';
 
 const Sidebar: React.FC = () => {
+  const { favorites } = useFavorites();
+  
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -10,18 +13,18 @@ const Sidebar: React.FC = () => {
       </div>
 
       <nav className="sidebar-nav">
-        <a href="#" className="nav-item active">
+        <button className="nav-item active">
           <i className="fa-solid fa-home"></i>
           <span>Home</span>
-        </a>
-        <a href="#" className="nav-item">
+        </button>
+        <button className="nav-item">
           <i className="fa-solid fa-search"></i>
           <span>Search</span>
-        </a>
-        <a href="#" className="nav-item">
+        </button>
+        <button className="nav-item">
           <i className="fa-solid fa-book"></i>
           <span>Your Library</span>
-        </a>
+        </button>
       </nav>
 
       <div className="sidebar-section">
@@ -68,27 +71,21 @@ const Sidebar: React.FC = () => {
           </h3>
         </div>
         <ul className="favorites-list">
-          <li className="favorite-item">
-            <div className="favorite-checkbox"></div>
-            <div>
-              <div className="favorite-name">Better Day</div>
-              <div className="favorite-artist">Artist One</div>
-            </div>
-          </li>
-          <li className="favorite-item">
-            <div className="favorite-checkbox"></div>
-            <div>
-              <div className="favorite-name">Sunset Dreams</div>
-              <div className="favorite-artist">Artist Two</div>
-            </div>
-          </li>
-          <li className="favorite-item">
-            <div className="favorite-checkbox"></div>
-            <div>
-              <div className="favorite-name">Night Drive</div>
-              <div className="favorite-artist">Artist Three</div>
-            </div>
-          </li>
+          {favorites.length === 0 ? (
+            <li className="favorite-item empty">
+              <div className="favorite-name" style={{ opacity: 0.5 }}>No favorites yet</div>
+            </li>
+          ) : (
+            favorites.map(song => (
+              <li key={song.id} className="favorite-item">
+                <div className="favorite-checkbox"></div>
+                <div>
+                  <div className="favorite-name">{song.title}</div>
+                  <div className="favorite-artist">{song.artist}</div>
+                </div>
+              </li>
+            ))
+          )}
         </ul>
       </div>
     </div>
