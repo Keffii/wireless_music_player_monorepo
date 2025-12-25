@@ -44,6 +44,13 @@ export const useMusicPlayer = () => {
     }
   }, []);
 
+  // Safe play function
+  const safePlay = useCallback(() => {
+    audioRef.current?.play().catch((error: Error) => {
+      console.warn('Autoplay blocked – waiting for user interaction.', error);
+    });
+  }, []);
+
   // Update state from server
   const updateStateFromServer = useCallback((data: ServerState) => {
     console.log('Server state update:', data);
@@ -108,13 +115,7 @@ export const useMusicPlayer = () => {
         audioRef.current.duration
       );
     }
-  }, []);
-
-  const safePlay = useCallback(() => {
-    audioRef.current?.play().catch((error: Error) => {
-      console.warn('Autoplay blocked – waiting for user interaction.', error);
-    });
-  }, []);
+  }, [safePlay]);
 
   // SSE Connection
   const connectSSE = useCallback(() => {

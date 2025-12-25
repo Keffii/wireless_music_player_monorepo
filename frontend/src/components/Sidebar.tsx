@@ -1,6 +1,8 @@
 import React from 'react';
 import './Sidebar.css';
 import { useFavorites } from '../context/FavoritesContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMusic, faHome, faSearch, faBook, faPlus, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar: React.FC = () => {
   const { favorites } = useFavorites();
@@ -8,21 +10,21 @@ const Sidebar: React.FC = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <i className="fa-solid fa-music sidebar-logo"></i>
+        <FontAwesomeIcon icon={faMusic} className="sidebar-logo" />
         <h1>MusicBox</h1>
       </div>
 
       <nav className="sidebar-nav">
         <button className="nav-item active">
-          <i className="fa-solid fa-home"></i>
+          <FontAwesomeIcon icon={faHome} />
           <span>Home</span>
         </button>
         <button className="nav-item">
-          <i className="fa-solid fa-search"></i>
+          <FontAwesomeIcon icon={faSearch} />
           <span>Search</span>
         </button>
         <button className="nav-item">
-          <i className="fa-solid fa-book"></i>
+          <FontAwesomeIcon icon={faBook} />
           <span>Your Library</span>
         </button>
       </nav>
@@ -30,32 +32,32 @@ const Sidebar: React.FC = () => {
       <div className="sidebar-section">
         <div className="section-header">
           <h3>PLAYLISTS</h3>
-          <i className="fa-solid fa-plus"></i>
+          <FontAwesomeIcon icon={faPlus} />
         </div>
         <ul className="playlist-list">
           <li className="playlist-item">
-            <i className="fa-solid fa-music"></i>
+            <FontAwesomeIcon icon={faMusic} />
             <div>
               <div className="playlist-name">My Playlist #1</div>
               <div className="playlist-count">24 songs</div>
             </div>
           </li>
           <li className="playlist-item">
-            <i className="fa-solid fa-music"></i>
+            <FontAwesomeIcon icon={faMusic} />
             <div>
               <div className="playlist-name">Chill Vibes</div>
               <div className="playlist-count">18 songs</div>
             </div>
           </li>
           <li className="playlist-item">
-            <i className="fa-solid fa-music"></i>
+            <FontAwesomeIcon icon={faMusic} />
             <div>
               <div className="playlist-name">Workout Mix</div>
               <div className="playlist-count">32 songs</div>
             </div>
           </li>
           <li className="playlist-item">
-            <i className="fa-solid fa-music"></i>
+            <FontAwesomeIcon icon={faMusic} />
             <div>
               <div className="playlist-name">Late Night</div>
               <div className="playlist-count">15 songs</div>
@@ -67,7 +69,7 @@ const Sidebar: React.FC = () => {
       <div className="sidebar-section">
         <div className="section-header">
           <h3>
-            <i className="fa-solid fa-heart"></i> FAVORITES
+            <FontAwesomeIcon icon={faHeart} /> FAVORITES
           </h3>
         </div>
         <ul className="favorites-list">
@@ -78,7 +80,20 @@ const Sidebar: React.FC = () => {
           ) : (
             favorites.map(song => (
               <li key={song.id} className="favorite-item">
-                <div className="favorite-checkbox"></div>
+                {song.coverUrl && (
+                  <img 
+                    src={song.coverUrl} 
+                    alt={song.title}
+                    className="favorite-cover"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '4px',
+                      objectFit: 'cover',
+                      marginRight: '10px'
+                    }}
+                  />
+                )}
                 <div>
                   <div className="favorite-name">{song.title}</div>
                   <div className="favorite-artist">{song.artist}</div>

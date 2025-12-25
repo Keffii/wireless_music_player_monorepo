@@ -4,6 +4,9 @@ import com.example.media_controller_iot.models.Songs;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface SongsRepo extends JpaRepository<Songs, Long> {
+    List<Songs> findByCategory(String category);
 }

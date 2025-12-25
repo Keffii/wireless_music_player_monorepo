@@ -23,3 +23,14 @@ export const loadSongs = async () => {
     return [];
   }
 };
+
+export const loadSongsByCategory = async (category: string) => {
+  try {
+    const res = await fetch(`${API_BASE}/api/player/songs/category/${encodeURIComponent(category)}`);
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Failed to load songs for category ${category}:`, error);
+    return [];
+  }
+};

@@ -4,6 +4,7 @@ export interface Song {
   artist: string;
   srcUrl: string;
   coverUrl: string;
+  category?: string;
 }
 
 export interface ServerState {

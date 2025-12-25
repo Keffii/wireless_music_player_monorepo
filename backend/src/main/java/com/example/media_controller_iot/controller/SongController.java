@@ -20,4 +20,9 @@ public class SongController {
     public List<Songs> getAllSongs() {
         return songRepository.findAll();
     }
+    
+    @GetMapping("/songs/category/{category}")
+    public List<Songs> getSongsByCategory(@PathVariable String category) {
+        return songRepository.findByCategory(category);
+    }
 }

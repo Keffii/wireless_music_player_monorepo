@@ -23,4 +23,7 @@ public class Songs {
     
     @Column(name = "cover_url")
     private String coverUrl;
+    
+    @Column(name = "category")
+    private String category;
 }
