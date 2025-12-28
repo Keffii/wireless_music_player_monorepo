@@ -31,6 +31,7 @@ const MusicPlayer: React.FC = () => {
     loadSongs,
     connectSSE,
     safePlay,
+    setUserAdjustingVolume,
   } = useMusicPlayer();
 
   const progressSliderRef = useRef<HTMLInputElement | null>(null);
@@ -71,11 +72,25 @@ const MusicPlayer: React.FC = () => {
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newVolume = parseInt(e.target.value);
+    
+    // Mark that user is adjusting volume (prevents SSE from overriding)
+    setUserAdjustingVolume(true);
+    
+    // Update UI and audio element immediately for instant feedback
     setVolume(newVolume);
+    setIsMuted(false); // Unmute when manually adjusting volume
     if (audioRef.current) {
       audioRef.current.volume = newVolume / 100;
     }
-    sendCommand(`VOLUME:${newVolume}`);
+    // Don't send to backend yet - wait until drag ends
+  };
+
+  const handleVolumeChangeEnd = (): void => {
+    // Send final volume to backend when user finishes dragging
+    sendCommand(`VOLUME:${volume}`);
+    
+    // Mark that user finished adjusting volume
+    setUserAdjustingVolume(false);
   };
 
   const handleMute = (): void => {
@@ -142,6 +157,7 @@ const MusicPlayer: React.FC = () => {
         isMuted={isMuted}
         volumeSliderRef={volumeSliderRef}
         onVolumeChange={handleVolumeChange}
+        onVolumeChangeEnd={handleVolumeChangeEnd}
         onMute={handleMute}
       />
     </div>

@@ -7,6 +7,7 @@ interface VolumeControlProps {
   isMuted: boolean;
   volumeSliderRef: React.RefObject<HTMLInputElement | null>;
   onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onVolumeChangeEnd: () => void;
   onMute: () => void;
 }
 
@@ -15,6 +16,7 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
   isMuted,
   volumeSliderRef,
   onVolumeChange,
+  onVolumeChangeEnd,
   onMute,
 }) => {
   return (
@@ -33,6 +35,8 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
         max="100"
         value={volume}
         onChange={onVolumeChange}
+        onMouseUp={onVolumeChangeEnd}
+        onTouchEnd={onVolumeChangeEnd}
       />
     </div>
   );

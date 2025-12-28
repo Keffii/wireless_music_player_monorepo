@@ -7,6 +7,7 @@ interface PlayerRightSectionProps {
   isMuted: boolean;
   volumeSliderRef: React.RefObject<HTMLInputElement | null>;
   onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onVolumeChangeEnd: () => void;
   onMute: () => void;
 }
 
@@ -15,6 +16,7 @@ export const PlayerRightSection: React.FC<PlayerRightSectionProps> = ({
   isMuted,
   volumeSliderRef,
   onVolumeChange,
+  onVolumeChangeEnd,
   onMute,
 }) => {
   return (
@@ -24,6 +26,7 @@ export const PlayerRightSection: React.FC<PlayerRightSectionProps> = ({
         isMuted={isMuted}
         volumeSliderRef={volumeSliderRef}
         onVolumeChange={onVolumeChange}
+        onVolumeChangeEnd={onVolumeChangeEnd}
         onMute={onMute}
       />
       <a

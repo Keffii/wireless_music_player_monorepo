@@ -8,42 +8,42 @@
 }
 
 .greeting-section {
-  margin-bottom: 32px;
+  margin-bottom: 16px; 
 }
 
 .greeting-section h1 {
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 700;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   color: var(--foreground);
 }
 
 .greeting-section p {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--muted-foreground);
   margin: 0;
 }
 
 .content-section {
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .section-title i {
   color: var(--primary);
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .section-title h2 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   margin: 0;
   color: var(--foreground);
@@ -51,13 +51,13 @@
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+  gap: 10px; /* Reduced gap for tighter fit */
 }
 
 @media (min-width: 768px) {
   .card-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(7, 1fr);
   }
 }
 
@@ -65,7 +65,7 @@
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 10px; /* Further reduced for compact layout */
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s;
 }
@@ -77,8 +77,8 @@
 
 .card-image {
   width: 100%;
-  aspect-ratio: 1;
-  margin-bottom: 16px;
+  aspect-ratio: 1; /* This makes it square - height = width */
+  margin-bottom: 8px; /* Further reduced for compact layout */
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -97,7 +97,7 @@
 }
 
 .card-info h3 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   margin: 0 0 4px 0;
   color: var(--card-foreground);
@@ -107,7 +107,7 @@
 }
 
 .card-info p {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--muted-foreground);
   margin: 0;
   white-space: nowrap;
@@ -118,7 +118,7 @@
 .recommendation-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -131,9 +131,9 @@
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 10px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   transition: background-color 0.2s;
   cursor: pointer;
@@ -144,8 +144,8 @@
 }
 
 .rec-image {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
@@ -184,7 +184,7 @@
 .browse-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -196,7 +196,7 @@
 .browse-category {
   height: 100px;
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 14px;
   display: flex;
   align-items: flex-end;
   cursor: pointer;
@@ -211,11 +211,11 @@
 }
 
 .browse-category h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   margin: 0;
   color: var(--foreground);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.6); /* Stronger shadow for better text visibility */
 }
 
 /* Scrollbar styling */

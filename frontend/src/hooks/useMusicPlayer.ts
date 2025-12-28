@@ -19,6 +19,8 @@ export const useMusicPlayer = () => {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const songsRef = useRef<Song[]>([]);
+  const userIsAdjustingVolume = useRef<boolean>(false);
+  const volumeUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Load songs
   const loadSongs = useCallback(async () => {
@@ -59,12 +61,16 @@ export const useMusicPlayer = () => {
     setSongArtist(data.artist);
     setShuffleEnabled(data.shuffle);
     setRepeatEnabled(data.repeat);
-    setVolume(data.volume);
-    setIsMuted(data.isMuted);
+    
+    // Only update volume from server if user is not actively adjusting it
+    if (!userIsAdjustingVolume.current) {
+      setVolume(data.volume);
+      setIsMuted(data.isMuted);
 
-    // Apply volume changes to audio element
-    if (audioRef.current) {
-      audioRef.current.volume = data.isMuted ? 0 : data.volume / 100;
+      // Apply volume changes to audio element
+      if (audioRef.current) {
+        audioRef.current.volume = data.isMuted ? 0 : data.volume / 100;
+      }
     }
 
     // Use ref to get current songs array
@@ -140,6 +146,23 @@ export const useMusicPlayer = () => {
     songsRef.current = songs;
   }, [songs]);
 
+  // Function to mark when user starts/stops adjusting volume
+  const setUserAdjustingVolume = useCallback((isAdjusting: boolean) => {
+    userIsAdjustingVolume.current = isAdjusting;
+    
+    // Clear any existing timeout
+    if (volumeUpdateTimeout.current) {
+      clearTimeout(volumeUpdateTimeout.current);
+    }
+    
+    // If user stopped adjusting, allow server updates after a short delay
+    if (!isAdjusting) {
+      volumeUpdateTimeout.current = setTimeout(() => {
+        userIsAdjustingVolume.current = false;
+      }, 500);
+    }
+  }, []);
+
   return {
     // State
     songs,
@@ -169,5 +192,6 @@ export const useMusicPlayer = () => {
     loadSongs,
     connectSSE,
     safePlay,
+    setUserAdjustingVolume,
   };
 };
