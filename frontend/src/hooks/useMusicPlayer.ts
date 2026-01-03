@@ -21,6 +21,7 @@ export const useMusicPlayer = () => {
   const songsRef = useRef<Song[]>([]);
   const userIsAdjustingVolume = useRef<boolean>(false);
   const volumeUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastSongIdRef = useRef<number | null>(null);
 
   // Load songs
   const loadSongs = useCallback(async () => {
@@ -76,7 +77,22 @@ export const useMusicPlayer = () => {
     // Use ref to get current songs array
     const song = songsRef.current.find(s => s.id === data.currentSongId);
     if (song) {
+      // Check if song actually changed before updating UI
+      const songChanged = lastSongIdRef.current !== null && lastSongIdRef.current !== data.currentSongId;
+      
       setCurrentSong(song);
+      
+      // Dispatch event when song changes (but not on initial load)
+      if (songChanged) {
+        console.log('Song changed from', lastSongIdRef.current, 'to', data.currentSongId);
+        // Use setTimeout to ensure the event is dispatched after the state update
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('songChanged', { detail: { songId: data.currentSongId } }));
+        }, 0);
+      }
+      
+      // Always update the last song ID
+      lastSongIdRef.current = data.currentSongId;
       
       // Update cover URL with fallback
       if (song.coverUrl) {

@@ -53,6 +53,20 @@ export const loadSongsByCategory = async (category: string) => {
   }
 };
 
+export const getRecentlyPlayed = async () => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/player/recently-played`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch recently played: ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to load recently played:', error);
+    return [];
+  }
+};
+
 // Favorites API
 export const getFavorites = async () => {
   try {

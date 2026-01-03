@@ -1,7 +1,10 @@
 package com.example.media_controller_iot.controller;
 
 import com.example.media_controller_iot.models.Songs;
+import com.example.media_controller_iot.repository.PlayerCommandLogRepo;
 import com.example.media_controller_iot.repository.SongsRepo;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +14,11 @@ import java.util.List;
 public class SongController {
 
     private final SongsRepo songRepository;
+    private final PlayerCommandLogRepo commandLogRepository;
 
-    public SongController(SongsRepo songRepository) {
+    public SongController(SongsRepo songRepository, PlayerCommandLogRepo commandLogRepository) {
         this.songRepository = songRepository;
+        this.commandLogRepository = commandLogRepository;
     }
 
     @GetMapping("/songs")
@@ -24,5 +29,18 @@ public class SongController {
     @GetMapping("/songs/category/{category}")
     public List<Songs> getSongsByCategory(@PathVariable String category) {
         return songRepository.findByCategory(category);
+    }
+
+    @GetMapping("/recently-played")
+    public List<Songs> getRecentlyPlayed(Authentication authentication) {
+        String userId = getCurrentUserId(authentication);
+        return commandLogRepository.findRecentlyPlayedSongsByUserId(userId);
+    }
+
+    private String getCurrentUserId(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getSubject();
+        }
+        throw new IllegalStateException("User is not authenticated");
     }
 }

@@ -2,6 +2,8 @@ package com.example.media_controller_iot.controller;
 
 import com.example.media_controller_iot.service.PlayerService;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -18,9 +20,17 @@ public class PlayerController {
     }
 
     @PostMapping("/command")
-    public void playCommand(@RequestBody Map<String, String> body) {
+    public void playCommand(@RequestBody Map<String, String> body, Authentication authentication) {
         String command = body.get("command");
-        playerService.mediaCommands(command);
+        String userId = getCurrentUserId(authentication);
+        playerService.mediaCommands(command, userId);
+    }
+
+    private String getCurrentUserId(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getSubject();
+        }
+        return null; // Allow anonymous commands (e.g., Bluetooth listener)
     }
 
     @GetMapping("/state")

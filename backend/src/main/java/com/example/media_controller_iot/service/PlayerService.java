@@ -125,6 +125,10 @@ public class PlayerService {
     }
 
     public void mediaCommands(String cmd) {
+        mediaCommands(cmd, null);
+    }
+
+    public void mediaCommands(String cmd, String userId) {
         switch (cmd) {
             case "PLAY" -> isPlaying = true;
             case "PAUSE" -> isPlaying = false;
@@ -141,7 +145,7 @@ public class PlayerService {
         }
 
         lastCommand = cmd;
-        playerCommandLogRepo.save(new PlayerCommandLog(cmd, currentSong));
+        playerCommandLogRepo.save(new PlayerCommandLog(cmd, currentSong, userId));
         broadcastState();
     }
 

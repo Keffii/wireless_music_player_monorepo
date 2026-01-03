@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MainContent.css';
-import { loadSongsByCategory } from '../services/playerService';
+import { loadSongsByCategory, getRecentlyPlayed } from '../services/playerService';
 import { Song } from '../types/music.types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faChartLine, faCompass } from '@fortawesome/free-solid-svg-icons';
@@ -12,6 +12,39 @@ const MainContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'home' | 'category'>('home');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categorySongs, setCategorySongs] = useState<Song[]>([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
+
+  // Load recently played songs
+  const loadRecentlyPlayed = async () => {
+    const songs = await getRecentlyPlayed();
+    setRecentlyPlayed(songs.slice(0, 4)); // Show max 4 songs
+  };
+
+  // Load recently played on mount
+  useEffect(() => {
+    loadRecentlyPlayed();
+  }, []);
+
+  // Listen for song changes via SSE and update recently played
+  useEffect(() => {
+    const handleSongChange = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('Received songChanged event:', customEvent.detail);
+      // Delay slightly to ensure backend has processed the command
+      setTimeout(() => {
+        console.log('Reloading recently played...');
+        loadRecentlyPlayed();
+      }, 500);
+    };
+
+    console.log('Setting up songChanged listener');
+    window.addEventListener('songChanged', handleSongChange);
+    
+    return () => {
+      console.log('Removing songChanged listener');
+      window.removeEventListener('songChanged', handleSongChange);
+    };
+  }, []);
 
   const handleCategoryClick = async (category: string) => {
     setSelectedCategory(category);
@@ -92,44 +125,23 @@ const MainContent: React.FC = () => {
           <FontAwesomeIcon icon={faClock} />
           <h2>Recently Played</h2>
         </div>
-        <div className="card-grid">
-          <div className="music-card">
-            <div className="card-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="card-info">
-              <h3>Better Day</h3>
-              <p>Artist One</p>
-            </div>
+        {recentlyPlayed.length > 0 ? (
+          <div className="card-grid">
+            {recentlyPlayed.map((song) => (
+              <div key={song.id} className="music-card">
+                <div className="card-image">
+                  <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                </div>
+                <div className="card-info">
+                  <h3>{song.title}</h3>
+                  <p>{song.artist}</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="music-card">
-            <div className="card-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="card-info">
-              <h3>Night Vibes</h3>
-              <p>Artist Two</p>
-            </div>
-          </div>
-          <div className="music-card">
-            <div className="card-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="card-info">
-              <h3>Summer Breeze</h3>
-              <p>Artist Three</p>
-            </div>
-          </div>
-          <div className="music-card">
-            <div className="card-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="card-info">
-              <h3>City Lights</h3>
-              <p>Artist Four</p>
-            </div>
-          </div>
-        </div>
+        ) : (
+          <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>No recently played songs yet. Start playing to see your history!</p>
+        )}
       </section>
 
       <section className="content-section">
