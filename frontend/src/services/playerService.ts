@@ -53,6 +53,21 @@ export const loadSongsByCategory = async (category: string) => {
   }
 };
 
+export const searchSongs = async (query: string) => {
+  try {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/player/songs/search?query=${encodeURIComponent(query.trim())}`, { headers });
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Failed to search songs for query "${query}":`, error);
+    return [];
+  }
+};
+
 export const getRecentlyPlayed = async () => {
   try {
     const headers = await getHeaders();

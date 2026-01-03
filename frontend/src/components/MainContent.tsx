@@ -1,29 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import './MainContent.css';
-import { loadSongsByCategory, getRecentlyPlayed } from '../services/playerService';
+import { loadSongsByCategory, getRecentlyPlayed, searchSongs } from '../services/playerService';
 import { Song } from '../types/music.types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faChartLine, faCompass } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { useAuth } from '../context/AuthContext';
 
-const MainContent: React.FC = () => {
+interface MainContentProps {
+  viewMode: 'home' | 'category' | 'search';
+  onNavigate: (mode: 'home' | 'category' | 'search') => void;
+}
+
+const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNavigate }) => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState<'home' | 'category'>('home');
+  const [viewMode, setViewMode] = useState<'home' | 'category' | 'search'>(propViewMode);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categorySongs, setCategorySongs] = useState<Song[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // Load recently played songs
   const loadRecentlyPlayed = async () => {
     const songs = await getRecentlyPlayed();
-    setRecentlyPlayed(songs.slice(0, 4)); // Show max 4 songs
+    setRecentlyPlayed(songs.slice(0, 8)); // Show max 8 songs
   };
+
+  // Sync viewMode from props
+  useEffect(() => {
+    setViewMode(propViewMode);
+  }, [propViewMode]);
 
   // Load recently played on mount
   useEffect(() => {
     loadRecentlyPlayed();
   }, []);
+
+  // Real-time search with debounce
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (searchQuery.trim().length > 0) {
+        setIsSearching(true);
+        const results = await searchSongs(searchQuery);
+        setSearchResults(results);
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(delaySearch);
+  }, [searchQuery]);
 
   // Listen for song changes via SSE and update recently played
   useEffect(() => {
@@ -56,9 +85,89 @@ const MainContent: React.FC = () => {
 
   const handleBackToHome = () => {
     setViewMode('home');
+    onNavigate('home');
     setSelectedCategory(null);
     setCategorySongs([]);
+    setSearchQuery('');
+    setSearchResults([]);
   };
+
+  // Search Page View
+  if (viewMode === 'search') {
+    return (
+      <div className="main-content">
+        <div className="greeting-section">
+          <button 
+            onClick={handleBackToHome}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back to Home
+          </button>
+          <h1>Search</h1>
+          <p>Find your favorite songs</p>
+        </div>
+
+        <section className="content-section">
+          <div style={{ marginBottom: '1.5rem' }}>
+            <input
+              type="text"
+              placeholder="Search by song title or artist..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--foreground)',
+                fontSize: '16px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'hotpink'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
+
+          {isSearching ? (
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>Searching...</p>
+          ) : searchQuery.trim().length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>Start typing to search for songs</p>
+          ) : searchResults.length > 0 ? (
+            <div className="card-grid">
+              {searchResults.map((song) => (
+                <div key={song.id} className="music-card">
+                  <div className="card-image">
+                    <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                  </div>
+                  <div className="card-info">
+                    <h3>{song.title}</h3>
+                    <p>{song.artist}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>No results found for "{searchQuery}"</p>
+          )}
+        </section>
+      </div>
+    );
+  }
 
   // Category Page View
   if (viewMode === 'category' && selectedCategory) {
@@ -146,44 +255,8 @@ const MainContent: React.FC = () => {
 
       <section className="content-section">
         <div className="section-title">
-          <FontAwesomeIcon icon={faChartLine} />
-          <h2>Made For You</h2>
-        </div>
-        <div className="recommendation-grid">
-          <div className="recommendation-card">
-            <div className="rec-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="rec-info">
-              <h3>Daily Mix 1</h3>
-              <p>Based on your listening</p>
-            </div>
-          </div>
-          <div className="recommendation-card">
-            <div className="rec-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="rec-info">
-              <h3>Discover New Songs</h3>
-              <p>New music for you</p>
-            </div>
-          </div>
-          <div className="recommendation-card">
-            <div className="rec-image">
-              <div className="placeholder-image"></div>
-            </div>
-            <div className="rec-info">
-              <h3>New Releases</h3>
-              <p>Latest releases</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="content-section">
-        <div className="section-title">
           <FontAwesomeIcon icon={faCompass} />
-          <h2>Browse</h2>
+          <h2>Browse Genres</h2>
         </div>
         <div className="browse-grid">
           <div 

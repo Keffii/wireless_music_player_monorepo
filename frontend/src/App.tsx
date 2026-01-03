@@ -11,6 +11,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+  const [mainView, setMainView] = useState<'home' | 'category' | 'search'>('home');
+
+  const handleNavigate = (view: 'home' | 'category' | 'search') => {
+    setMainView(view);
+  };
 
   if (isLoading) {
     return (
@@ -37,8 +42,8 @@ const AppContent: React.FC = () => {
     <FavoritesProvider>
       <div className="App">
         <div className="app-container">
-          <Sidebar />
-          <MainContent />
+          <Sidebar onNavigate={handleNavigate} currentView={mainView} />
+          <MainContent viewMode={mainView} onNavigate={handleNavigate} />
         </div>
         <MusicPlayer />
       </div>

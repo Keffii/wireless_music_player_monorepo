@@ -5,7 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic, faHome, faSearch, faBook, faPlus, faHeart, faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onNavigate: (view: 'home' | 'category' | 'search') => void;
+  currentView: 'home' | 'category' | 'search';
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView }) => {
   const { favorites } = useFavorites();
   const { user, signOut } = useAuth();
   
@@ -17,17 +22,13 @@ const Sidebar: React.FC = () => {
       </div>
 
       <nav className="sidebar-nav">
-        <button className="nav-item active">
+        <button className={`nav-item ${currentView === 'home' ? 'active' : ''}`} onClick={() => onNavigate('home')}>
           <FontAwesomeIcon icon={faHome} />
           <span>Home</span>
         </button>
-        <button className="nav-item">
+        <button className={`nav-item ${currentView === 'search' ? 'active' : ''}`} onClick={() => onNavigate('search')}>
           <FontAwesomeIcon icon={faSearch} />
           <span>Search</span>
-        </button>
-        <button className="nav-item">
-          <FontAwesomeIcon icon={faBook} />
-          <span>Your Library</span>
         </button>
       </nav>
 

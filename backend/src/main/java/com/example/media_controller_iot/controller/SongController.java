@@ -30,6 +30,14 @@ public class SongController {
     public List<Songs> getSongsByCategory(@PathVariable String category) {
         return songRepository.findByCategory(category);
     }
+    
+    @GetMapping("/songs/search")
+    public List<Songs> searchSongs(@RequestParam String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        return songRepository.searchByTitleOrArtist(query.trim());
+    }
 
     @GetMapping("/recently-played")
     public List<Songs> getRecentlyPlayed(Authentication authentication) {
