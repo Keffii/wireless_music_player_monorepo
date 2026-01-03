@@ -5,8 +5,10 @@ import { Song } from '../types/music.types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faChartLine, faCompass } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
+import { useAuth } from '../context/AuthContext';
 
 const MainContent: React.FC = () => {
+  const { user } = useAuth();
   const [viewMode, setViewMode] = useState<'home' | 'category'>('home');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categorySongs, setCategorySongs] = useState<Song[]>([]);
@@ -81,7 +83,7 @@ const MainContent: React.FC = () => {
   return (
     <div className="main-content">
       <div className="greeting-section">
-        <h1>Hi, USER_NAME</h1>
+        <h1>Hi, {user?.username || 'User'}</h1>
         <p>Welcome back! Here's what's playing.</p>
       </div>
 

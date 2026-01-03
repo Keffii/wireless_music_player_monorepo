@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { configureAmplify } from './services/authService';
+
+// Configure AWS Amplify for Cognito
+configureAmplify();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

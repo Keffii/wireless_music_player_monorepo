@@ -31,3 +31,10 @@ aws.s3.bucket=${AWS_S3_BUCKET:wireless-music-player-files}
 # Max file size (default: 50MB for music files)
 spring.servlet.multipart.max-file-size=50MB
 spring.servlet.multipart.max-request-size=50MB
+
+# --- AWS COGNITO CONFIG ---
+# AWS Cognito User Pool Configuration
+# Required for JWT authentication
+aws.cognito.region=${AWS_COGNITO_REGION:us-east-1}
+aws.cognito.userPoolId=${AWS_COGNITO_USER_POOL_ID:us-east-1_XXXXXXXXX}
+aws.cognito.appClientId=${AWS_COGNITO_APP_CLIENT_ID:your-app-client-id}
