@@ -48,15 +48,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Get allowed origins from environment variable or use default
+        // Use allowedOriginPatterns instead of allowedOrigins for wildcard support with credentials
         String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+            configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:8001",
-                "http://localhost:*"
+            configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*"
             ));
         }
         

@@ -51,8 +51,8 @@
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
-  gap: 10px; /* Reduced gap for tighter fit */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -65,7 +65,7 @@
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px; /* Further reduced for compact layout */
+  padding: 10px; 
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s;
 }
@@ -78,7 +78,7 @@
 .card-image {
   width: 100%;
   aspect-ratio: 1; /* This makes it square - height = width */
-  margin-bottom: 8px; /* Further reduced for compact layout */
+  margin-bottom: 8px;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);

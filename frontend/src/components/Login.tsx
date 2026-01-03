@@ -48,7 +48,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
           {error && <div className="form-error">{error}</div>}
           
           <div className="form-group">
-            <label className="form-label" htmlFor="username">Username</label>
+            <label className="form-label" htmlFor="username">Email or Username</label>
             <input
               id="username"
               type="text"

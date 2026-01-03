@@ -53,3 +53,70 @@ export const loadSongsByCategory = async (category: string) => {
   }
 };
 
+// Favorites API
+export const getFavorites = async () => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/favorites`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch favorites: ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to load favorites:', error);
+    return [];
+  }
+};
+
+export const addFavorite = async (songId: number): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/favorites/${songId}`, {
+      method: 'POST',
+      headers
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to add favorite: ${res.status}`);
+    }
+    const data = await res.json();
+    return data.success;
+  } catch (error) {
+    console.error('Failed to add favorite:', error);
+    return false;
+  }
+};
+
+export const removeFavorite = async (songId: number): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/favorites/${songId}`, {
+      method: 'DELETE',
+      headers
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to remove favorite: ${res.status}`);
+    }
+    const data = await res.json();
+    return data.success;
+  } catch (error) {
+    console.error('Failed to remove favorite:', error);
+    return false;
+  }
+};
+
+export const checkFavorite = async (songId: number): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/favorites/check/${songId}`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to check favorite: ${res.status}`);
+    }
+    const data = await res.json();
+    return data.isFavorite;
+  } catch (error) {
+    console.error('Failed to check favorite:', error);
+    return false;
+  }
+};
+
