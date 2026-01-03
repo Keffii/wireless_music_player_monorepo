@@ -84,7 +84,7 @@ const MainContent: React.FC = () => {
     <div className="main-content">
       <div className="greeting-section">
         <h1>Hi, {user?.username || 'User'}</h1>
-        <p>Welcome back! Here's what's playing.</p>
+        <p>Welcome! Here's what's playing.</p>
       </div>
 
       <section className="content-section">

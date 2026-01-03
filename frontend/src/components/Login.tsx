@@ -40,7 +40,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
       <div className="auth-card">
         <div className="auth-header">
           <FontAwesomeIcon icon={faMusic} className="auth-logo" />
-          <h1 className="auth-title">Welcome Back</h1>
+          <h1 className="auth-title">Welcome</h1>
           <p className="auth-subtitle">Sign in to continue to MusicBox</p>
         </div>
 

@@ -1,11 +1,13 @@
 import React from 'react';
 import './Sidebar.css';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMusic, faHome, faSearch, faBook, faPlus, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faMusic, faHome, faSearch, faBook, faPlus, faHeart, faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar: React.FC = () => {
   const { favorites } = useFavorites();
+  const { user, signOut } = useAuth();
   
   return (
     <div className="sidebar">
@@ -102,6 +104,21 @@ const Sidebar: React.FC = () => {
             ))
           )}
         </ul>
+      </div>
+
+      <div className="sidebar-footer">
+        <div className="user-profile">
+          <div className="user-avatar">
+            <FontAwesomeIcon icon={faUser} />
+          </div>
+          <div className="user-info">
+            <div className="user-name">{user?.username || 'User'}</div>
+          </div>
+        </div>
+        <button className="sign-out-button" onClick={signOut}>
+          <FontAwesomeIcon icon={faSignOutAlt} />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   );
