@@ -1,37 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import './MainContent.css';
-import { loadSongsByCategory, getRecentlyPlayed, searchSongs } from '../services/playerService';
+import { loadSongsByCategory, getRecentlyPlayed, searchSongs, getPlaylistSongs, sendCommand, setPlaylistQueue, playSpecificSong } from '../services/playerService';
 import { Song } from '../types/music.types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faChartLine, faCompass } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faChartLine, faCompass, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { useAuth } from '../context/AuthContext';
 
 interface MainContentProps {
-  viewMode: 'home' | 'category' | 'search';
-  onNavigate: (mode: 'home' | 'category' | 'search') => void;
+  viewMode: 'home' | 'category' | 'search' | 'playlist';
+  onNavigate: (mode: 'home' | 'category' | 'search' | 'playlist') => void;
+  selectedPlaylistId?: number | null;
+  selectedPlaylistName?: string | null;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNavigate }) => {
+const MainContent: React.FC<MainContentProps> = ({ 
+  viewMode: propViewMode, 
+  onNavigate, 
+  selectedPlaylistId, 
+  selectedPlaylistName 
+}) => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState<'home' | 'category' | 'search'>(propViewMode);
+  const [viewMode, setViewMode] = useState<'home' | 'category' | 'search' | 'playlist'>(propViewMode);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categorySongs, setCategorySongs] = useState<Song[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [playlistSongs, setPlaylistSongs] = useState<Song[]>([]);
+  const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
 
   // Load recently played songs
   const loadRecentlyPlayed = async () => {
     const songs = await getRecentlyPlayed();
-    setRecentlyPlayed(songs.slice(0, 8)); // Show max 8 songs
+    setRecentlyPlayed(songs.slice(0, 7)); // Show max 7 songs
   };
 
   // Sync viewMode from props
   useEffect(() => {
     setViewMode(propViewMode);
   }, [propViewMode]);
+
+  // Load playlist songs when viewing a playlist
+  useEffect(() => {
+    if (viewMode === 'playlist' && selectedPlaylistId) {
+      const loadPlaylist = async () => {
+        const songs = await getPlaylistSongs(selectedPlaylistId);
+        setPlaylistSongs(songs);
+      };
+      loadPlaylist();
+    }
+  }, [viewMode, selectedPlaylistId]);
 
   // Load recently played on mount
   useEffect(() => {
@@ -90,7 +110,142 @@ const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNav
     setCategorySongs([]);
     setSearchQuery('');
     setSearchResults([]);
+    setPlaylistSongs([]);
   };
+
+  const handlePlayAll = async () => {
+    if (playlistSongs.length === 0) return;
+    
+    // Get song IDs from playlist songs
+    const songIds = playlistSongs.map(song => song.id);
+    
+    // Set the playlist queue on the backend
+    const success = await setPlaylistQueue(songIds);
+    if (success) {
+      console.log('Playlist queue set, now playing playlist songs only');
+    }
+  };
+
+  const handleSongClick = async (song: Song, songsInContext: Song[]) => {
+    const songIds = songsInContext.map(s => s.id);
+    const success = await playSpecificSong(song.id, songIds);
+    if (success) {
+      // Refresh recently played after a short delay to ensure backend has updated
+      setTimeout(() => {
+        loadRecentlyPlayed();
+      }, 500);
+    }
+  };
+
+  // Playlist Page View
+  if (viewMode === 'playlist' && selectedPlaylistId) {
+    return (
+      <div className="main-content">
+        <div className="greeting-section">
+          <button 
+            onClick={handleBackToHome}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back to Home
+          </button>
+          <div>
+            <h1>{selectedPlaylistName || 'Playlist'}</h1>
+            <p>{playlistSongs.length} song{playlistSongs.length !== 1 ? 's' : ''}</p>
+            {playlistSongs.length > 0 && (
+              <button
+                onClick={handlePlayAll}
+                style={{
+                  background: 'hotpink',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(255, 105, 180, 0.3)',
+                  marginTop: '1rem'
+                }}
+              >
+                <FontAwesomeIcon icon={faPlay} />
+                Play All
+              </button>
+            )}
+          </div>
+        </div>
+
+        {playlistSongs.length > 0 ? (
+          <section className="content-section">
+            <div className="card-grid">
+              {playlistSongs.map((song) => (
+                <div 
+                  key={song.id} 
+                  className="music-card"
+                  onMouseEnter={() => setHoveredCardId(song.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  style={{ position: 'relative', cursor: 'pointer' }}
+                >
+                  <div className="card-image" onClick={() => handleSongClick(song, playlistSongs)}>
+                    <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    {hoveredCardId === song.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          background: 'hotpink',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                        }}>
+                          <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="card-info">
+                    <h3>{song.title}</h3>
+                    <p>{song.artist}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="content-section">
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>No songs in this playlist yet</p>
+          </section>
+        )}
+      </div>
+    );
+  }
 
   // Search Page View
   if (viewMode === 'search') {
@@ -150,9 +305,42 @@ const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNav
           ) : searchResults.length > 0 ? (
             <div className="card-grid">
               {searchResults.map((song) => (
-                <div key={song.id} className="music-card">
-                  <div className="card-image">
+                <div 
+                  key={song.id} 
+                  className="music-card"
+                  onMouseEnter={() => setHoveredCardId(song.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  style={{ position: 'relative', cursor: 'pointer' }}
+                >
+                  <div className="card-image" onClick={() => handleSongClick(song, searchResults)}>
                     <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    {hoveredCardId === song.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          background: 'hotpink',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                        }}>
+                          <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="card-info">
                     <h3>{song.title}</h3>
@@ -200,9 +388,42 @@ const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNav
           <section className="content-section">
             <div className="card-grid">
               {categorySongs.map((song) => (
-                <div key={song.id} className="music-card">
-                  <div className="card-image">
+                <div 
+                  key={song.id} 
+                  className="music-card"
+                  onMouseEnter={() => setHoveredCardId(song.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  style={{ position: 'relative', cursor: 'pointer' }}
+                >
+                  <div className="card-image" onClick={() => handleSongClick(song, categorySongs)}>
                     <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    {hoveredCardId === song.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          background: 'hotpink',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                        }}>
+                          <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="card-info">
                     <h3>{song.title}</h3>
@@ -237,9 +458,42 @@ const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNav
         {recentlyPlayed.length > 0 ? (
           <div className="card-grid">
             {recentlyPlayed.map((song) => (
-              <div key={song.id} className="music-card">
-                <div className="card-image">
+              <div 
+                key={song.id} 
+                className="music-card"
+                onMouseEnter={() => setHoveredCardId(song.id)}
+                onMouseLeave={() => setHoveredCardId(null)}
+                style={{ position: 'relative', cursor: 'pointer' }}
+              >
+                <div className="card-image" onClick={() => handleSongClick(song, recentlyPlayed)}>
                   <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                  {hoveredCardId === song.id && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      borderRadius: '8px'
+                    }}>
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        background: 'hotpink',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                      }}>
+                        <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="card-info">
                   <h3>{song.title}</h3>
@@ -276,9 +530,9 @@ const MainContent: React.FC<MainContentProps> = ({ viewMode: propViewMode, onNav
           <div 
             className="browse-category" 
             style={{ background: 'linear-gradient(135deg, #d35400, #e67e22)', cursor: 'pointer' }}
-            onClick={() => handleCategoryClick('Hip Hop')}
+            onClick={() => handleCategoryClick('Lofi')}
           >
-            <h3>Hip Hop</h3>
+            <h3>Lofi</h3>
           </div>
           <div 
             className="browse-category" 

@@ -1,18 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Sidebar.css';
 import { useFavorites } from '../context/FavoritesContext';
+import { usePlaylists } from '../context/PlaylistContext';
 import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMusic, faHome, faSearch, faBook, faPlus, faHeart, faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faMusic, faHome, faSearch, faPlus, faHeart, faSignOutAlt, faUser, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
-  onNavigate: (view: 'home' | 'category' | 'search') => void;
-  currentView: 'home' | 'category' | 'search';
+  onNavigate: (view: 'home' | 'category' | 'search' | 'playlist') => void;
+  currentView: 'home' | 'category' | 'search' | 'playlist';
+  onPlaylistClick?: (playlistId: number, playlistName: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistClick }) => {
   const { favorites } = useFavorites();
+  const { playlists, createPlaylist, deletePlaylist } = usePlaylists();
   const { user, signOut } = useAuth();
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+
+  const handleCreatePlaylist = async () => {
+    if (newPlaylistName.trim()) {
+      const success = await createPlaylist(newPlaylistName.trim());
+      if (success) {
+        setNewPlaylistName('');
+        setShowCreatePlaylist(false);
+      }
+    }
+  };
+
+  const handleDeletePlaylist = async (playlistId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this playlist?')) {
+      await deletePlaylist(playlistId);
+    }
+  };
   
   return (
     <div className="sidebar">
@@ -35,37 +57,74 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView }) => {
       <div className="sidebar-section">
         <div className="section-header">
           <h3>PLAYLISTS</h3>
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon 
+            icon={faPlus} 
+            onClick={() => setShowCreatePlaylist(!showCreatePlaylist)}
+            style={{ cursor: 'pointer' }}
+          />
         </div>
+        {showCreatePlaylist && (
+          <div style={{ padding: '8px 0' }}>
+            <input
+              type="text"
+              placeholder="Playlist name"
+              value={newPlaylistName}
+              onChange={(e) => setNewPlaylistName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleCreatePlaylist()}
+              style={{
+                width: '100%',
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--foreground)',
+                outline: 'none'
+              }}
+              autoFocus
+            />
+          </div>
+        )}
         <ul className="playlist-list">
-          <li className="playlist-item">
-            <FontAwesomeIcon icon={faMusic} />
-            <div>
-              <div className="playlist-name">My Playlist #1</div>
-              <div className="playlist-count">24 songs</div>
-            </div>
-          </li>
-          <li className="playlist-item">
-            <FontAwesomeIcon icon={faMusic} />
-            <div>
-              <div className="playlist-name">Chill Vibes</div>
-              <div className="playlist-count">18 songs</div>
-            </div>
-          </li>
-          <li className="playlist-item">
-            <FontAwesomeIcon icon={faMusic} />
-            <div>
-              <div className="playlist-name">Workout Mix</div>
-              <div className="playlist-count">32 songs</div>
-            </div>
-          </li>
-          <li className="playlist-item">
-            <FontAwesomeIcon icon={faMusic} />
-            <div>
-              <div className="playlist-name">Late Night</div>
-              <div className="playlist-count">15 songs</div>
-            </div>
-          </li>
+          {playlists.length === 0 ? (
+            <li className="playlist-item" style={{ opacity: 0.5 }}>
+              <FontAwesomeIcon icon={faMusic} />
+              <div>
+                <div className="playlist-name">No playlists yet</div>
+                <div className="playlist-count">Click + to create one</div>
+              </div>
+            </li>
+          ) : (
+            playlists.map(playlist => (
+              <li 
+                key={playlist.id} 
+                className="playlist-item" 
+                style={{ position: 'relative', cursor: 'pointer' }}
+                onClick={() => {
+                  if (onPlaylistClick) {
+                    onPlaylistClick(playlist.id, playlist.name);
+                  }
+                }}
+              >
+                <FontAwesomeIcon icon={faMusic} />
+                <div style={{ flex: 1 }}>
+                  <div className="playlist-name">{playlist.name}</div>
+                  <div className="playlist-count">{playlist.songCount} songs</div>
+                </div>
+                <FontAwesomeIcon 
+                  icon={faTrash} 
+                  onClick={(e) => handleDeletePlaylist(playlist.id, e)}
+                  style={{
+                    fontSize: '12px',
+                    opacity: 0.6,
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                />
+              </li>
+            ))
+          )}
         </ul>
       </div>
 

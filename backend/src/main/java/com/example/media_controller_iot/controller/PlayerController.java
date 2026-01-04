@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -52,5 +53,21 @@ public class PlayerController {
         emitter.onTimeout(() -> playerService.removeEmitter(emitter));
 
         return emitter;
+    }
+
+    @PostMapping("/playlist-queue")
+    public void setPlaylistQueue(@RequestBody Map<String, Object> body, Authentication authentication) {
+        String userId = getCurrentUserId(authentication);
+        @SuppressWarnings("unchecked")
+        List<Integer> songIdsInt = (List<Integer>) body.get("songIds");
+        
+        if (songIdsInt == null) {
+            playerService.setPlaylistQueue(null, userId);
+        } else {
+            List<Long> songIds = songIdsInt.stream()
+                    .map(Integer::longValue)
+                    .toList();
+            playerService.setPlaylistQueue(songIds, userId);
+        }
     }
 }

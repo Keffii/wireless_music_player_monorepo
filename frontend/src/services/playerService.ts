@@ -149,3 +149,144 @@ export const checkFavorite = async (songId: number): Promise<boolean> => {
   }
 };
 
+// Playlist API
+export const getPlaylists = async () => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists/with-counts`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch playlists: ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to load playlists:', error);
+    return [];
+  }
+};
+
+export const createPlaylist = async (name: string): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name })
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to create playlist:', error);
+    return false;
+  }
+};
+
+export const deletePlaylist = async (playlistId: number): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists/${playlistId}`, {
+      method: 'DELETE',
+      headers
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to delete playlist:', error);
+    return false;
+  }
+};
+
+export const addSongToPlaylist = async (playlistId: number, songId: number): Promise<{ success: boolean; playlistName?: string }> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists/${playlistId}/songs/${songId}`, {
+      method: 'POST',
+      headers
+    });
+    
+    if (res.ok) {
+      // Fetch the playlist name for the toast
+      const playlistsRes = await fetch(`${API_BASE}/api/playlists`, { headers });
+      if (playlistsRes.ok) {
+        const playlists = await playlistsRes.json();
+        const playlist = playlists.find((p: any) => p.id === playlistId);
+        return { success: true, playlistName: playlist?.name };
+      }
+      return { success: true };
+    }
+    return { success: false };
+  } catch (error) {
+    console.error('Failed to add song to playlist:', error);
+    return { success: false };
+  }
+};
+
+export const removeSongFromPlaylist = async (playlistId: number, songId: number): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists/${playlistId}/songs/${songId}`, {
+      method: 'DELETE',
+      headers
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to remove song from playlist:', error);
+    return false;
+  }
+};
+
+export const getPlaylistSongs = async (playlistId: number) => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/playlists/${playlistId}/songs`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch playlist songs: ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to load playlist songs:', error);
+    return [];
+  }
+};
+
+export const setPlaylistQueue = async (songIds: number[]): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_BASE}/api/player/playlist-queue`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ songIds })
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to set playlist queue:', error);
+    return false;
+  }
+};
+
+export const playSpecificSong = async (songId: number, queueSongIds: number[]): Promise<boolean> => {
+  try {
+    const headers = await getHeaders();
+    
+    // Reorder the queue so the clicked song is first
+    const clickedIndex = queueSongIds.indexOf(songId);
+    if (clickedIndex === -1) return false;
+    
+    // Create new queue with clicked song first, followed by rest of the songs
+    const reorderedQueue = [
+      queueSongIds[clickedIndex],
+      ...queueSongIds.slice(clickedIndex + 1),
+      ...queueSongIds.slice(0, clickedIndex)
+    ];
+    
+    // Set the reordered queue - backend will automatically start playing the first song
+    const res = await fetch(`${API_BASE}/api/player/playlist-queue`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ songIds: reorderedQueue })
+    });
+    
+    return res.ok;
+  } catch (error) {
+    console.error('Failed to play specific song:', error);
+    return false;
+  }
+};
+

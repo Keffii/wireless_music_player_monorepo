@@ -6,15 +6,29 @@ import MusicPlayer from './components/MusicPlayer';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { PlaylistProvider } from './context/PlaylistContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
-  const [mainView, setMainView] = useState<'home' | 'category' | 'search'>('home');
+  const [mainView, setMainView] = useState<'home' | 'category' | 'search' | 'playlist'>('home');
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
+  const [selectedPlaylistName, setSelectedPlaylistName] = useState<string | null>(null);
 
-  const handleNavigate = (view: 'home' | 'category' | 'search') => {
+  const handleNavigate = (view: 'home' | 'category' | 'search' | 'playlist') => {
     setMainView(view);
+    if (view !== 'playlist') {
+      setSelectedPlaylistId(null);
+      setSelectedPlaylistName(null);
+    }
+  };
+
+  const handlePlaylistClick = (playlistId: number, playlistName: string) => {
+    setSelectedPlaylistId(playlistId);
+    setSelectedPlaylistName(playlistName);
+    setMainView('playlist');
   };
 
   if (isLoading) {
@@ -39,15 +53,28 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <FavoritesProvider>
-      <div className="App">
-        <div className="app-container">
-          <Sidebar onNavigate={handleNavigate} currentView={mainView} />
-          <MainContent viewMode={mainView} onNavigate={handleNavigate} />
-        </div>
-        <MusicPlayer />
-      </div>
-    </FavoritesProvider>
+    <ToastProvider>
+      <FavoritesProvider>
+        <PlaylistProvider>
+          <div className="App">
+            <div className="app-container">
+              <Sidebar 
+                onNavigate={handleNavigate} 
+                currentView={mainView} 
+                onPlaylistClick={handlePlaylistClick}
+              />
+              <MainContent 
+                viewMode={mainView} 
+                onNavigate={handleNavigate}
+                selectedPlaylistId={selectedPlaylistId}
+                selectedPlaylistName={selectedPlaylistName}
+              />
+            </div>
+            <MusicPlayer />
+          </div>
+        </PlaylistProvider>
+      </FavoritesProvider>
+    </ToastProvider>
   );
 };
 
