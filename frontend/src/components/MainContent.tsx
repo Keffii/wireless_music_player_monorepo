@@ -223,7 +223,8 @@ const MainContent: React.FC<MainContentProps> = ({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)',
+                          transform: 'translateY(-50%)'
                         }}>
                           <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
                         </div>
@@ -335,7 +336,8 @@ const MainContent: React.FC<MainContentProps> = ({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)',
+                          transform: 'translateY(-50%)'
                         }}>
                           <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
                         </div>
@@ -418,7 +420,8 @@ const MainContent: React.FC<MainContentProps> = ({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)',
+                          transform: 'translateY(-50%)'
                         }}>
                           <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
                         </div>
@@ -488,7 +491,8 @@ const MainContent: React.FC<MainContentProps> = ({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)'
+                        boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)',
+                        transform: 'translateY(-50%)'
                       }}>
                         <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
                       </div>
@@ -515,17 +519,17 @@ const MainContent: React.FC<MainContentProps> = ({
         <div className="browse-grid">
           <div 
             className="browse-category" 
-            style={{ background: 'linear-gradient(135deg, #8e44ad, #9b59b6)', cursor: 'pointer' }}
-            onClick={() => handleCategoryClick('Pop')}
+            style={{ background: 'linear-gradient(135deg, #16a085, #1abc9c)', cursor: 'pointer' }}
+            onClick={() => handleCategoryClick('Electronic')}
           >
-            <h3>Pop</h3>
+            <h3>Electronic</h3>
           </div>
           <div 
             className="browse-category" 
-            style={{ background: 'linear-gradient(135deg, #c0392b, #e74c3c)', cursor: 'pointer' }}
-            onClick={() => handleCategoryClick('Rock')}
+            style={{ background: 'linear-gradient(135deg, #8e44ad, #9b59b6)', cursor: 'pointer' }}
+            onClick={() => handleCategoryClick('Hiphop')}
           >
-            <h3>Rock</h3>
+            <h3>Hiphop</h3>
           </div>
           <div 
             className="browse-category" 
@@ -536,10 +540,10 @@ const MainContent: React.FC<MainContentProps> = ({
           </div>
           <div 
             className="browse-category" 
-            style={{ background: 'linear-gradient(135deg, #16a085, #1abc9c)', cursor: 'pointer' }}
-            onClick={() => handleCategoryClick('Electronic')}
+            style={{ background: 'linear-gradient(135deg, #c0392b, #e74c3c)', cursor: 'pointer' }}
+            onClick={() => handleCategoryClick('Trance')}
           >
-            <h3>Electronic</h3>
+            <h3>Trance</h3>
           </div>
         </div>
       </section>

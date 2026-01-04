@@ -31,11 +31,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints (health checks, SSE, etc.)
+                // Public endpoints (health checks, SSE)
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/health/**").permitAll()
                 .requestMatchers("/api/player/stream").permitAll()  // SSE endpoint (EventSource can't send auth headers)
-                .requestMatchers("/api/files/upload/**").permitAll()  // File upload (TEMPORARY - for testing only)
                 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
