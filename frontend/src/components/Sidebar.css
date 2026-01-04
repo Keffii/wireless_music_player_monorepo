@@ -117,8 +117,7 @@
   color: var(--primary);
 }
 
-.playlist-list,
-.favorites-list {
+.playlist-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -126,6 +125,17 @@
   flex-direction: column;
   gap: 4px;
   max-height: 250px;
+  overflow-y: auto;
+}
+
+.favorites-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
   overflow-y: auto;
 }
 
