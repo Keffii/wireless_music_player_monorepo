@@ -17,16 +17,8 @@
 }
 
 .sidebar-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-  font-size: 24px;
-  flex-shrink: 0;
-  filter: drop-shadow(0 0 10px var(--player-glow));
+  height: 70px;
+  width: auto;
 }
 
 .sidebar-header h1 {
@@ -84,6 +76,7 @@
 .sidebar-section {
   margin-bottom: 16px;
   padding: 0 12px;
+  flex-shrink: 0;
 }
 
 .section-header {
@@ -124,7 +117,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 250px;
+  height: 240px;
   overflow-y: auto;
 }
 
@@ -135,7 +128,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 260px;
+  height: 245px;
   overflow-y: auto;
 }
 

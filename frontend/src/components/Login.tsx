@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import logo from '../assets/logo.png';
 import './Auth.css';
 
 interface LoginProps {
@@ -39,9 +40,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <FontAwesomeIcon icon={faMusic} className="auth-logo" />
-          <h1 className="auth-title">Welcome</h1>
-          <p className="auth-subtitle">Sign in to continue to MusicBox</p>
+          <img src={logo} alt="MusicBox Logo" className="auth-logo-login"/>
+          <h1 className="auth-title">Welcome to Music Box</h1>
+          <p className="auth-subtitle">Sign in to continue</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>

@@ -3,8 +3,11 @@ import './Sidebar.css';
 import { useFavorites } from '../context/FavoritesContext';
 import { usePlaylists } from '../context/PlaylistContext';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMusic, faHome, faSearch, faPlus, faHeart, faSignOutAlt, faUser, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faMusic, faHome, faSearch, faPlus, faHeart, faSignOutAlt, faUser, faTrash, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { Song } from '../types/music.types';
+import { playSpecificSong } from '../services/playerService';
 
 interface SidebarProps {
   onNavigate: (view: 'home' | 'category' | 'search' | 'playlist') => void;
@@ -18,6 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
   const { user, signOut } = useAuth();
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [hoveredFavoriteId, setHoveredFavoriteId] = useState<number | null>(null);
 
   const handleCreatePlaylist = async () => {
     if (newPlaylistName.trim()) {
@@ -35,12 +39,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
       await deletePlaylist(playlistId);
     }
   };
+
+  const handleFavoriteSongClick = async (song: Song) => {
+    const songIds = favorites.map(s => s.id);
+    await playSpecificSong(song.id, songIds);
+  };
   
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <FontAwesomeIcon icon={faMusic} className="sidebar-logo" />
-        <h1>MusicBox</h1>
+        <img src={logo} alt="MusicBox Logo" className="sidebar-logo"/>
+        <h1>Music Box</h1>
       </div>
 
       <nav className="sidebar-nav">
@@ -141,20 +150,56 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
             </li>
           ) : (
             favorites.map(song => (
-              <li key={song.id} className="favorite-item">
+              <li 
+                key={song.id} 
+                className="favorite-item"
+                onClick={() => handleFavoriteSongClick(song)}
+                onMouseEnter={() => setHoveredFavoriteId(song.id)}
+                onMouseLeave={() => setHoveredFavoriteId(null)}
+                style={{ cursor: 'pointer', position: 'relative' }}
+              >
                 {song.coverUrl && (
-                  <img 
-                    src={song.coverUrl} 
-                    alt={song.title}
-                    className="favorite-cover"
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '4px',
-                      objectFit: 'cover',
-                      marginRight: '10px'
-                    }}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <img 
+                      src={song.coverUrl} 
+                      alt={song.title}
+                      className="favorite-cover"
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '4px',
+                        objectFit: 'cover',
+                        marginRight: '10px'
+                      }}
+                    />
+                    {hoveredFavoriteId === song.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: '4px'
+                      }}>
+                        <div style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          background: 'hotpink',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 6px rgba(255, 105, 180, 0.5)'
+                        }}>
+                          <FontAwesomeIcon icon={faPlay} style={{ fontSize: '10px', marginLeft: '1px', color: 'white' }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 <div>
                   <div className="favorite-name">{song.title}</div>

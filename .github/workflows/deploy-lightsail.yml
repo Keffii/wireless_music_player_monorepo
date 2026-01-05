@@ -1,0 +1,173 @@
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend to Lightsail
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      
+      - name: Install Lightsail plugin
+        run: |
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
+          sudo chmod +x /usr/local/bin/lightsailctl
+      
+      - name: Build Docker image
+        working-directory: ./backend
+        run: |
+          docker build -t music-player-backend:${{ github.sha }} .
+          docker tag music-player-backend:${{ github.sha }} music-player-backend:latest
+      
+      - name: Push to Lightsail
+        run: |
+          aws lightsail push-container-image \
+            --region eu-central-1 \
+            --service-name music-player-backend \
+            --label backend-${{ github.sha }} \
+            --image music-player-backend:latest
+      
+      - name: Get image reference
+        id: image
+        run: |
+          IMAGE_TAG=$(aws lightsail get-container-images --service-name music-player-backend --region eu-central-1 \
+            --query "containerImages[?contains(image, 'backend-${{ github.sha }}')].image" \
+            --output text | head -n 1)
+          echo "reference=$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Create deployment config
+        run: |
+          cat > deployment.json <<EOF
+          {
+            "containers": {
+              "backend": {
+                "image": "${{ steps.image.outputs.reference }}",
+                "ports": {
+                  "8080": "HTTP"
+                },
+                "environment": {
+                  "SERVER_PORT": "8080",
+                  "SPRING_DATASOURCE_URL": "${{ secrets.SPRING_DATASOURCE_URL }}",
+                  "SPRING_DATASOURCE_USERNAME": "${{ secrets.SPRING_DATASOURCE_USERNAME }}",
+                  "SPRING_DATASOURCE_PASSWORD": "${{ secrets.SPRING_DATASOURCE_PASSWORD }}",
+                  "AWS_REGION": "eu-central-1",
+                  "AWS_S3_BUCKET": "${{ secrets.AWS_S3_BUCKET }}",
+                  "COGNITO_USER_POOL_ID": "${{ secrets.COGNITO_USER_POOL_ID }}",
+                  "COGNITO_REGION": "eu-central-1",
+                  "CORS_ALLOWED_ORIGINS": "${{ secrets.CORS_ALLOWED_ORIGINS }}"
+                }
+              }
+            },
+            "publicEndpoint": {
+              "containerName": "backend",
+              "containerPort": 8080,
+              "healthCheck": {
+                "path": "/actuator/health",
+                "intervalSeconds": 30,
+                "timeoutSeconds": 5,
+                "healthyThreshold": 2,
+                "unhealthyThreshold": 2
+              }
+            }
+          }
+          EOF
+      
+      - name: Deploy to Lightsail
+        run: |
+          aws lightsail create-container-service-deployment \
+            --region eu-central-1 \
+            --service-name music-player-backend \
+            --cli-input-json file://deployment.json
+      
+      - name: Wait for deployment
+        run: |
+          echo "Deployment started! Check status at:"
+          echo "https://lightsail.aws.amazon.com/ls/webapp/eu-central-1/containers/music-player-backend"
+
+  deploy-frontend:
+    name: Deploy Frontend to S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: deploy-backend  # Wait for backend to deploy first
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: ./frontend
+        env:
+          REACT_APP_API_BASE: ${{ secrets.REACT_APP_API_BASE }}
+          REACT_APP_COGNITO_REGION: eu-central-1
+          REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          REACT_APP_COGNITO_APP_CLIENT_ID: ${{ secrets.COGNITO_APP_CLIENT_ID }}
+        run: npm run build
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      
+      - name: Deploy to S3
+        run: |
+          # Sync all files except index.html with long cache
+          aws s3 sync frontend/build/ s3://${{ secrets.FRONTEND_S3_BUCKET }}/ \
+            --delete \
+            --cache-control "max-age=31536000,public,immutable" \
+            --exclude "index.html" \
+            --exclude "asset-manifest.json" \
+            --exclude "manifest.json"
+          
+          # Upload index.html with no-cache
+          aws s3 cp frontend/build/index.html s3://${{ secrets.FRONTEND_S3_BUCKET }}/index.html \
+            --cache-control "no-cache,no-store,must-revalidate" \
+            --metadata-directive REPLACE
+          
+          # Upload manifests with short cache
+          aws s3 cp frontend/build/manifest.json s3://${{ secrets.FRONTEND_S3_BUCKET }}/manifest.json \
+            --cache-control "max-age=3600" \
+            --metadata-directive REPLACE || true
+      
+      - name: Invalidate CloudFront cache
+        run: |
+          DISTRIBUTION_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          
+          if [ -n "$DISTRIBUTION_ID" ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id $DISTRIBUTION_ID \
+              --paths "/*"
+            echo "CloudFront cache invalidated"
+          else
+            echo "No CloudFront distribution ID provided, skipping cache invalidation"
+          fi
+      
+      - name: Deployment complete
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Frontend URL: https://${{ secrets.CLOUDFRONT_DOMAIN }}"
+          echo "Backend URL: ${{ secrets.REACT_APP_API_BASE }}"

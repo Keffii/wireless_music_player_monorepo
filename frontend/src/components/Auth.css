@@ -23,23 +23,20 @@
   margin-bottom: 2rem;
 }
 
-.auth-logo {
-  color: var(--primary);
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  filter: drop-shadow(0 0 10px var(--player-glow));
+.auth-logo-login {
+  height: 200px;
+  width: auto;
 }
 
 .auth-title {
   color: var(--foreground);
   font-size: 1.75rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
 }
 
 .auth-subtitle {
   color: var(--muted-foreground);
-  font-size: 0.95rem;
+  font-size: 1.5rem;
 }
 
 .auth-form {
