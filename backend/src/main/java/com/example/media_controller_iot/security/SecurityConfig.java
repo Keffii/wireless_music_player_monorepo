@@ -31,7 +31,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints (health checks, SSE)
+                // Public endpoints (health checks, SSE, nginx health)
+                .requestMatchers("/").permitAll()  // Allow nginx health checks
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/health/**").permitAll()
                 .requestMatchers("/api/player/stream").permitAll()  // SSE endpoint (EventSource can't send auth headers)
