@@ -193,7 +193,7 @@ export const deletePlaylist = async (playlistId: number): Promise<boolean> => {
   }
 };
 
-export const addSongToPlaylist = async (playlistId: number, songId: number): Promise<{ success: boolean; playlistName?: string }> => {
+export const addSongToPlaylist = async (playlistId: number, songId: number): Promise<{ success: boolean; playlistName?: string; alreadyExists?: boolean }> => {
   try {
     const headers = await getHeaders();
     const res = await fetch(`${API_BASE}/api/playlists/${playlistId}/songs/${songId}`, {
@@ -202,14 +202,19 @@ export const addSongToPlaylist = async (playlistId: number, songId: number): Pro
     });
     
     if (res.ok) {
+      const data = await res.json();
       // Fetch the playlist name for the toast
       const playlistsRes = await fetch(`${API_BASE}/api/playlists`, { headers });
       if (playlistsRes.ok) {
         const playlists = await playlistsRes.json();
         const playlist = playlists.find((p: any) => p.id === playlistId);
-        return { success: true, playlistName: playlist?.name };
+        return { 
+          success: true, 
+          playlistName: playlist?.name,
+          alreadyExists: data.alreadyExists || false
+        };
       }
-      return { success: true };
+      return { success: true, alreadyExists: data.alreadyExists || false };
     }
     return { success: false };
   } catch (error) {

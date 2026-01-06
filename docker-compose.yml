@@ -8,7 +8,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-admin}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "${DB_PORT:-3307}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -26,23 +26,30 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://db:3306/wireless_music_player_db}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-admin}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-password}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:*,http://frontend:*,http://*:3000,http://*:3001,http://*:80}
+      AWS_REGION: ${AWS_REGION:-eu-central-1}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-wireless-music-player-files}
+      COGNITO_REGION: ${COGNITO_REGION:-eu-central-1}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-eu-central-1_9GKrnPnwt}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:*,http://frontend:*,http://*:8001}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "${BACKEND_PORT:-8081}:8080"
+      - "${BACKEND_PORT:-8080}:8080"
 
   frontend:
     build:
       context: ./frontend
       args:
-        REACT_APP_API_BASE: ${REACT_APP_API_BASE:-http://backend:8080}
+        REACT_APP_API_BASE: ${REACT_APP_API_BASE:-http://localhost:8080}
+        REACT_APP_COGNITO_REGION: ${REACT_APP_COGNITO_REGION:-eu-central-1}
+        REACT_APP_COGNITO_USER_POOL_ID: ${REACT_APP_COGNITO_USER_POOL_ID:-eu-central-1_9GKrnPnwt}
+        REACT_APP_COGNITO_APP_CLIENT_ID: ${REACT_APP_COGNITO_APP_CLIENT_ID:-nbi6of817it1n1s6g2tfadlc6}
     restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "${FRONTEND_PORT:-8001}:8080"
 
   grafana:
     image: grafana/grafana:latest
@@ -50,12 +57,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SERVER_ROOT_URL=http://localhost:${GRAFANA_PORT:-9090}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      - "${GRAFANA_PORT:-9090}:3000"
     volumes:
       - grafana_data:/var/lib/grafana
 

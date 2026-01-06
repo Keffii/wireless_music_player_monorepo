@@ -40,13 +40,16 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           <div
             key={toast.id}
             style={{
-              background: toast.type === 'success' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' :
-                         toast.type === 'error' ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' :
-                         'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
+              background: toast.type === 'success' ? 'var(--primary)' :
+                         toast.type === 'error' ? 'var(--accent)' :
+                         'var(--secondary)',
+              color: toast.type === 'success' ? 'var(--primary-foreground)' :
+                     toast.type === 'error' ? 'var(--accent-foreground)' :
+                     'var(--secondary-foreground)',
               padding: '12px 20px',
               borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
               fontSize: '14px',
               fontWeight: '500',
               minWidth: '250px',

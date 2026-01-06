@@ -71,7 +71,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     if (result.success) {
       setShowPlaylistDropdown(false);
       const playlistName = result.playlistName || 'playlist';
-      showToast(`Song added to ${playlistName}`, 'success');
+      
+      if (result.alreadyExists) {
+        showToast(`Song already in ${playlistName}`, 'info');
+      } else {
+        showToast(`Song added to ${playlistName}`, 'success');
+        // Playlist count will update automatically via SSE
+      }
     } else {
       showToast('Failed to add song to playlist', 'error');
     }

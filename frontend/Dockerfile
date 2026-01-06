@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy dependency files first for better caching
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source files
 COPY . .
@@ -40,6 +40,7 @@ RUN addgroup -g 1001 nginx-user && adduser -D -u 1001 -G nginx-user nginx-user
 RUN chown -R nginx-user:nginx-user /var/cache/nginx && \
     chown -R nginx-user:nginx-user /var/log/nginx && \
     chown -R nginx-user:nginx-user /etc/nginx/conf.d && \
+    chown -R nginx-user:nginx-user /usr/share/nginx/html && \
     touch /var/run/nginx.pid && \
     chown -R nginx-user:nginx-user /var/run/nginx.pid
 

@@ -159,7 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
                 style={{ cursor: 'pointer', position: 'relative' }}
               >
                 {song.coverUrl && (
-                  <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'relative', flexShrink: 0, width: '40px', height: '40px', lineHeight: 0 }}>
                     <img 
                       src={song.coverUrl} 
                       alt={song.title}
@@ -169,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
                         height: '40px',
                         borderRadius: '4px',
                         objectFit: 'cover',
-                        marginRight: '10px'
+                        display: 'block'
                       }}
                     />
                     {hoveredFavoriteId === song.id && (
@@ -201,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, currentView, onPlaylistCl
                     )}
                   </div>
                 )}
-                <div>
+                <div className="favorite-text">
                   <div className="favorite-name">{song.title}</div>
                   <div className="favorite-artist">{song.artist}</div>
                 </div>

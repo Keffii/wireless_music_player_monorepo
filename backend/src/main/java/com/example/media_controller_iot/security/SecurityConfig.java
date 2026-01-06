@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .requestMatchers("/").permitAll()  // Allow nginx health checks
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/health/**").permitAll()
-                .requestMatchers("/api/player/stream").permitAll()  // SSE endpoint (EventSource can't send auth headers)
+                .requestMatchers("/api/player/stream").permitAll()  // Player SSE endpoint (EventSource can't send auth headers)
                 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
