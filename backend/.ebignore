@@ -9,4 +9,3 @@ MIGRATION_GUIDE.md
 SETUP_CHECKLIST.md
 REACT_CONVERSION_SUMMARY.md
 Dockerrun.aws.json
-.ebextensions/
