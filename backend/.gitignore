@@ -36,3 +36,9 @@ build/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Deployment Artifacts
+application.jar
+deploy.zip
+*.jar
+*.zip
