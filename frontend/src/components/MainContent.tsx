@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './MainContent.css';
-import { loadSongsByCategory, getRecentlyPlayed, searchSongs, getPlaylistSongs, sendCommand, setPlaylistQueue, playSpecificSong } from '../services/playerService';
+import { loadSongsByCategory, getRecentlyPlayed, searchSongs, getPlaylistSongs, setPlaylistQueue, playSpecificSong, loadSongs } from '../services/playerService';
 import { Song } from '../types/music.types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faChartLine, faCompass, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faCompass, faPlay, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { useAuth } from '../context/AuthContext';
 
 interface MainContentProps {
-  viewMode: 'home' | 'category' | 'search' | 'playlist';
-  onNavigate: (mode: 'home' | 'category' | 'search' | 'playlist') => void;
+  viewMode: 'home' | 'category' | 'search' | 'playlist' | 'all-songs';
+  onNavigate: (mode: 'home' | 'category' | 'search' | 'playlist' | 'all-songs') => void;
   selectedPlaylistId?: number | null;
   selectedPlaylistName?: string | null;
 }
@@ -21,7 +21,7 @@ const MainContent: React.FC<MainContentProps> = ({
   selectedPlaylistName 
 }) => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState<'home' | 'category' | 'search' | 'playlist'>(propViewMode);
+  const [viewMode, setViewMode] = useState<'home' | 'category' | 'search' | 'playlist' | 'all-songs'>(propViewMode);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categorySongs, setCategorySongs] = useState<Song[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([]);
@@ -29,6 +29,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [playlistSongs, setPlaylistSongs] = useState<Song[]>([]);
+  const [allSongs, setAllSongs] = useState<Song[]>([]);
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
 
   // Load recently played songs
@@ -103,6 +104,14 @@ const MainContent: React.FC<MainContentProps> = ({
     console.log(`${category} songs:`, songs);
   };
 
+  const handleBrowseAllSongs = async () => {
+    setViewMode('all-songs');
+    onNavigate('all-songs');
+    const songs = await loadSongs();
+    setAllSongs(songs);
+    console.log('All songs:', songs);
+  };
+
   const handleBackToHome = () => {
     setViewMode('home');
     onNavigate('home');
@@ -111,6 +120,7 @@ const MainContent: React.FC<MainContentProps> = ({
     setSearchQuery('');
     setSearchResults([]);
     setPlaylistSongs([]);
+    setAllSongs([]);
   };
 
   const handlePlayAll = async () => {
@@ -445,6 +455,92 @@ const MainContent: React.FC<MainContentProps> = ({
     );
   }
 
+  // All Songs Page View
+  if (viewMode === 'all-songs') {
+    return (
+      <div className="main-content">
+        <div className="greeting-section">
+          <button 
+            onClick={handleBackToHome}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back to Home
+          </button>
+          <h1>All Songs</h1>
+          <p>{allSongs.length} song{allSongs.length !== 1 ? 's' : ''} in library</p>
+        </div>
+
+        {allSongs.length > 0 ? (
+          <section className="content-section">
+            <div className="card-grid">
+              {allSongs.map((song) => (
+                <div 
+                  key={song.id} 
+                  className="music-card"
+                  onMouseEnter={() => setHoveredCardId(song.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  style={{ position: 'relative', cursor: 'pointer' }}
+                >
+                  <div className="card-image" onClick={() => handleSongClick(song, allSongs)}>
+                    <img src={song.coverUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    {hoveredCardId === song.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          background: 'hotpink',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 12px rgba(255, 105, 180, 0.5)',
+                          transform: 'translateY(-50%)'
+                        }}>
+                          <FontAwesomeIcon icon={faPlay} style={{ fontSize: '20px', marginLeft: '3px' }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="card-info">
+                    <h3>{song.title}</h3>
+                    <p>{song.artist}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="content-section">
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>No songs found in library</p>
+          </section>
+        )}
+      </div>
+    );
+  }
+
   // Home Page View
   return (
     <div className="main-content">
@@ -509,6 +605,26 @@ const MainContent: React.FC<MainContentProps> = ({
         ) : (
           <p style={{ textAlign: 'center', color: '#888', padding: '1rem' }}>No recently played songs yet. Start playing to see your history!</p>
         )}
+      </section>
+
+      <section className="content-section">
+        <div className="section-title">
+          <FontAwesomeIcon icon={faMusic} />
+          <h2>Browse All Songs</h2>
+        </div>
+        <div className="browse-grid">
+          <div 
+            className="browse-category" 
+            style={{ 
+              background: 'linear-gradient(135deg, #2c3e50, #34495e)', 
+              cursor: 'pointer',
+              gridColumn: '1 / -1'
+            }}
+            onClick={handleBrowseAllSongs}
+          >
+            <h3>Music Library</h3>
+          </div>
+        </div>
       </section>
 
       <section className="content-section">

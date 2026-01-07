@@ -13,11 +13,11 @@ import { ToastProvider } from './context/ToastContext';
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
-  const [mainView, setMainView] = useState<'home' | 'category' | 'search' | 'playlist'>('home');
+  const [mainView, setMainView] = useState<'home' | 'category' | 'search' | 'playlist' | 'all-songs'>('home');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState<string | null>(null);
 
-  const handleNavigate = (view: 'home' | 'category' | 'search' | 'playlist') => {
+  const handleNavigate = (view: 'home' | 'category' | 'search' | 'playlist' | 'all-songs') => {
     setMainView(view);
     if (view !== 'playlist') {
       setSelectedPlaylistId(null);

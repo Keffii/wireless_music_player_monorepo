@@ -10,8 +10,8 @@ import { Song } from '../types/music.types';
 import { playSpecificSong } from '../services/playerService';
 
 interface SidebarProps {
-  onNavigate: (view: 'home' | 'category' | 'search' | 'playlist') => void;
-  currentView: 'home' | 'category' | 'search' | 'playlist';
+  onNavigate: (view: 'home' | 'category' | 'search' | 'playlist' | 'all-songs') => void;
+  currentView: 'home' | 'category' | 'search' | 'playlist' | 'all-songs';
   onPlaylistClick?: (playlistId: number, playlistName: string) => void;
 }
 
