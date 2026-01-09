@@ -38,18 +38,23 @@ To register and test the platform without using your personal email, you can use
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/music-box.git
+git clone https://github.com/Keffii/wireless_music_player_monorepo.git
 
-# Navigate to the project directory
-cd music-box
+# Enter the correct repo folder
+cd wireless_music_player_monorepo
 
-# Run with Docker Compose
+# Option A: Run with Docker Compose (from repo root)
 docker-compose up -d
 
-# Or install dependencies locally
-npm install
+# Option B: Run services locally
 
-# Start the development server
+# Start backend (new terminal recommended)
+cd backend
+./mvnw spring-boot:run
+
+# Start frontend (new terminal)
+cd ../frontend
+npm install
 npm start
 ```
 
