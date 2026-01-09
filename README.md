@@ -72,7 +72,7 @@ The platform includes comprehensive monitoring and analytics powered by Grafana,
 List your technologies here, for example:
 - **Frontend**: React, TypeScript (Dockerized)
 - **Backend**: SpringBoot (Dockerized)
-- **Cloud**: AWS (Amplify, Elastis Bean Stalk, RDS, S3)
+- **Cloud**: AWS (Amplify, Elastic Bean Stalk, RDS, S3)
 - **Monitoring**: Grafana
 - **Database**: MySQL(AWS RDS)
 - **Containerization**: Docker
