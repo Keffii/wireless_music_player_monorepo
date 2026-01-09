@@ -17,7 +17,7 @@
 
 ## Website
 
-[https://develop.d2ma9zjubqxtjv.amplifyapp.com/](https://develop.d2ma9zjubqxtjv.amplifyapp.com/) (working applying a custom domain)
+[https://develop.d2ma9zjubqxtjv.amplifyapp.com/](https://develop.d2ma9zjubqxtjv.amplifyapp.com/) (working on applying a custom domain)
 
 ### Testing the Platform
 
