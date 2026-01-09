@@ -25,6 +25,10 @@ public class PlayerService {
 
     private final List<SseEmitter> emitters = new ArrayList<>();
 
+    // Playlist queue management
+    private List<Long> playlistQueue = new ArrayList<>();
+    private int currentQueueIndex = -1;
+
     private boolean isPlaying = false;
     private boolean isMuted = false;
     private int previousVolume = 50;
@@ -66,10 +70,38 @@ public class PlayerService {
     }
 
     private void nextSong() {
+        // If playlist queue is active, navigate within queue
+        if (!playlistQueue.isEmpty() && currentQueueIndex >= 0) {
+            if (repeatEnabled) {
+                // Stay on same song
+                playbackPosition = 0;
+                return;
+            }
+            
+            if (shuffleEnabled) {
+                Random r = new Random();
+                int newIndex;
+                do {
+                    newIndex = r.nextInt(playlistQueue.size());
+                } while (newIndex == currentQueueIndex && playlistQueue.size() > 1);
+                currentQueueIndex = newIndex;
+            } else {
+                currentQueueIndex = (currentQueueIndex + 1) % playlistQueue.size();
+            }
+            
+            Long songId = playlistQueue.get(currentQueueIndex);
+            songsRepo.findById(Objects.requireNonNull(songId)).ifPresent(song -> currentSong = song);
+            playbackPosition = 0;
+            return;
+        }
+
+        // Default behavior: use all songs
         List<Songs> songs = songsRepo.findAll();
         if (songs.isEmpty()) return;
 
+        // If repeat is enabled (and not shuffling), just restart the current song
         if (repeatEnabled && !shuffleEnabled) {
+            playbackPosition = 0;
             return;
         }
 
@@ -89,6 +121,16 @@ public class PlayerService {
     }
 
     private void prevSong() {
+        // If playlist queue is active, navigate within queue
+        if (!playlistQueue.isEmpty() && currentQueueIndex >= 0) {
+            currentQueueIndex = (currentQueueIndex - 1 + playlistQueue.size()) % playlistQueue.size();
+            Long songId = playlistQueue.get(currentQueueIndex);
+            songsRepo.findById(Objects.requireNonNull(songId)).ifPresent(song -> currentSong = song);
+            playbackPosition = 0;
+            return;
+        }
+
+        // Default behavior: use all songs
         List<Songs> songs = songsRepo.findAll();
         if (songs.isEmpty()) return;
 
@@ -123,6 +165,10 @@ public class PlayerService {
     }
 
     public void mediaCommands(String cmd) {
+        mediaCommands(cmd, null);
+    }
+
+    public void mediaCommands(String cmd, String userId) {
         switch (cmd) {
             case "PLAY" -> isPlaying = true;
             case "PAUSE" -> isPlaying = false;
@@ -139,7 +185,29 @@ public class PlayerService {
         }
 
         lastCommand = cmd;
-        playerCommandLogRepo.save(new PlayerCommandLog(cmd, currentSong));
+        playerCommandLogRepo.save(new PlayerCommandLog(cmd, currentSong, userId));
+        broadcastState();
+    }
+
+    public void setPlaylistQueue(List<Long> songIds, String userId) {
+        if (songIds == null || songIds.isEmpty()) {
+            // Clear playlist queue
+            playlistQueue.clear();
+            currentQueueIndex = -1;
+        } else {
+            playlistQueue = new ArrayList<>(songIds);
+            currentQueueIndex = 0;
+            // Load first song from queue
+            Long firstSongId = playlistQueue.get(0);
+            songsRepo.findById(Objects.requireNonNull(firstSongId)).ifPresent(song -> {
+                currentSong = song;
+                isPlaying = true;
+                // Log the command so it appears in recently played
+                lastCommand = "PLAY";
+                playerCommandLogRepo.save(new PlayerCommandLog("PLAY", song, userId));
+            });
+            playbackPosition = 0;
+        }
         broadcastState();
     }
 

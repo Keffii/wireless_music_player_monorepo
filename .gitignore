@@ -7,6 +7,11 @@ backend/.project
 backend/.settings/
 backend/bin/
 backend/out/
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application.properties
+backend/MIGRATION_GUIDE.md
+backend/SETUP_CHECKLIST.md
+backend/REACT_CONVERSION_SUMMARY.md
 
 # Frontend (React/Node)
 frontend/node_modules/
@@ -41,3 +46,12 @@ frontend/yarn-error.log*
 # Additional ignores
 # (kept in sync with project subfolders)
 frontend/dist/
+
+# Ignore refactor and structure docs created during development
+frontend/src/components/MusicPlayer.old.tsx
+frontend/STRUCTURE.md
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
